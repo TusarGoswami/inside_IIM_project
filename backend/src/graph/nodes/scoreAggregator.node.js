@@ -1,7 +1,5 @@
-import { createLLM } from '../../services/llm.service.js';
+import { invokeStructuredLLM } from '../../services/llm.service.js';
 import { scoreDimensionsSchema } from '../../schemas/research.schema.js';
-
-const MAX_RETRIES = 2;
 
 /**
  * Score Aggregator Node — gets LLM dimension scores, then applies
@@ -30,16 +28,12 @@ export async function scoreAggregatorNode(state) {
 }
 
 /**
- * Uses Gemini Flash to score the 3 LLM-dependent dimensions.
- * These feed into the deterministic computeVerdict function.
+ * Uses Gemini to score the 3 LLM-dependent dimensions.
  *
  * @param {import('../state.js').ICState} state
  * @returns {Promise<{marketPosition: number, financialHealth: number, growthTrajectory: number}>}
  */
 async function scoreDimensions(state) {
-  const llm = createLLM('flash');
-  const structuredLlm = llm.withStructuredOutput(scoreDimensionsSchema);
-
   const prompt = `You are scoring a company on three investment dimensions based on its investment memo.
 
 ## Company: ${state.companyName}
@@ -58,30 +52,22 @@ Score each dimension from 0-100 based ONLY on evidence in the memo:
 
 Be calibrated: most companies should score between 35 and 75. Only exceptional companies score 80+. Only genuinely distressed companies score below 25.`;
 
-  let lastError = null;
-  for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
-    try {
-      console.log(`[Score Aggregator] Scoring dimensions, attempt ${attempt}...`);
-      const result = await structuredLlm.invoke(prompt);
-      return {
-        marketPosition: Math.max(0, Math.min(100, Math.round(result.marketPosition))),
-        financialHealth: Math.max(0, Math.min(100, Math.round(result.financialHealth))),
-        growthTrajectory: Math.max(0, Math.min(100, Math.round(result.growthTrajectory))),
-      };
-    } catch (err) {
-      lastError = err;
-      console.warn(`[Score Aggregator] Attempt ${attempt} failed: ${err.message}`);
-      if (attempt <= MAX_RETRIES) {
-        const backoffMs = 2000 * attempt;
-        console.log(`[Score Aggregator] Backing off ${backoffMs}ms before retry (${attempt}/${MAX_RETRIES})...`);
-        await new Promise(r => setTimeout(r, backoffMs));
-      }
-    }
-  }
+  try {
+    const result = await invokeStructuredLLM({
+      schema: scoreDimensionsSchema,
+      prompt,
+      tier: 'flash',
+    });
 
-  // Fallback to conservative midpoint scores on total failure
-  console.warn(`[Score Aggregator] All LLM scoring attempts failed, using conservative defaults.`);
-  return { marketPosition: 50, financialHealth: 50, growthTrajectory: 50 };
+    return {
+      marketPosition: Math.max(0, Math.min(100, Math.round(result.marketPosition))),
+      financialHealth: Math.max(0, Math.min(100, Math.round(result.financialHealth))),
+      growthTrajectory: Math.max(0, Math.min(100, Math.round(result.growthTrajectory))),
+    };
+  } catch (err) {
+    console.warn(`[Score Aggregator] All LLM scoring attempts failed, using conservative defaults: ${err.message}`);
+    return { marketPosition: 50, financialHealth: 50, growthTrajectory: 50 };
+  }
 }
 
 /**

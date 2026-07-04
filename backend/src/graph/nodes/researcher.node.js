@@ -1,14 +1,11 @@
-import { createLLM } from '../../services/llm.service.js';
+import { invokeStructuredLLM } from '../../services/llm.service.js';
 import { searchCompany } from '../../services/search.service.js';
 import { researchSchema, pairsToRecord } from '../../schemas/research.schema.js';
 import { researcherPrompt } from '../../prompts/researcher.prompt.js';
 
-const MAX_RETRIES = 2;
-
 /**
  * Researcher Node — searches for company information using Tavily,
- * then uses Gemini (flash) to extract structured research data.
- * Validates output against Zod schema with up to 2 retries.
+ * then uses Gemini with automatic model fallback to extract structured research data.
  *
  * @param {import('../state.js').ICState} state
  * @returns {Promise<Partial<import('../state.js').ICState>>}
@@ -35,63 +32,45 @@ export async function researcherNode(state) {
     };
   }
 
-  // Step 2: Use Gemini to extract structured research from raw search results
-  const llm = createLLM('flash');
-  const structuredLlm = llm.withStructuredOutput(researchSchema);
-
+  // Step 2: Extract structured research using Gemini with fallback & backoff
   const prompt = researcherPrompt
     .replace('{companyName}', companyName)
     .replace('{searchResults}', searchResults);
 
-  let lastError = null;
+  const result = await invokeStructuredLLM({
+    schema: researchSchema,
+    prompt,
+    tier: 'flash',
+  });
 
-  for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
-    try {
-      console.log(`[Researcher] LLM extraction attempt ${attempt}...`);
-      const result = await structuredLlm.invoke(prompt);
+  // Convert financials from array-of-pairs to Record format
+  const financials = pairsToRecord(result.financials || []);
 
-      // Convert financials from array-of-pairs to Record format
-      const financials = pairsToRecord(result.financials || []);
+  // Merge Tavily-discovered source URLs with LLM-extracted ones
+  const allSources = mergeAndDeduplicateSources(result.sources || [], sourceUrls);
 
-      // Merge Tavily-discovered source URLs with LLM-extracted ones
-      const allSources = mergeAndDeduplicateSources(result.sources || [], sourceUrls);
+  // Apply lowDataConfidence logic: if fewer than 2 usable sources
+  const lowDataConfidence = allSources.length < 2 || result.lowDataConfidence;
 
-      // Apply lowDataConfidence logic: if fewer than 2 usable sources
-      const lowDataConfidence = allSources.length < 2 || result.lowDataConfidence;
+  const research = {
+    summary: result.summary,
+    financials,
+    competitors: result.competitors,
+    sentiment: result.sentiment,
+    sources: allSources,
+    lowDataConfidence,
+  };
 
-      const research = {
-        summary: result.summary,
-        financials,
-        competitors: result.competitors,
-        sentiment: result.sentiment,
-        sources: allSources,
-        lowDataConfidence,
-      };
+  console.log(`[Researcher] Research complete — ${allSources.length} sources, lowDataConfidence=${lowDataConfidence}`);
 
-      console.log(`[Researcher] Research complete — ${allSources.length} sources, lowDataConfidence=${lowDataConfidence}`);
-
-      return {
-        research,
-        reasoningTrail: [
-          `[Researcher] Completed research on "${companyName}" — found ${allSources.length} sources. ` +
-          `Low data confidence: ${lowDataConfidence}. ` +
-          `Sentiment: ${result.sentiment?.slice(0, 80)}...`,
-        ],
-      };
-    } catch (err) {
-      lastError = err;
-      console.warn(`[Researcher] Attempt ${attempt} failed: ${err.message}`);
-
-      if (attempt <= MAX_RETRIES) {
-        const backoffMs = 3000 * attempt;
-        console.log(`[Researcher] Backing off ${backoffMs}ms before retry (${attempt}/${MAX_RETRIES})...`);
-        await new Promise(r => setTimeout(r, backoffMs));
-      }
-    }
-  }
-
-  // All retries exhausted
-  throw new Error(`Researcher node failed after ${MAX_RETRIES + 1} attempts: ${lastError?.message}`);
+  return {
+    research,
+    reasoningTrail: [
+      `[Researcher] Completed research on "${companyName}" — found ${allSources.length} sources. ` +
+      `Low data confidence: ${lowDataConfidence}. ` +
+      `Sentiment: ${result.sentiment?.slice(0, 80)}...`,
+    ],
+  };
 }
 
 /**

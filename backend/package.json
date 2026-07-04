@@ -6,21 +6,9 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
+    "start": "node --watch src/server.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "keywords": [],
-  "license": "MIT",
-  "dependencies": {
-    "@langchain/community": "^1.1.29",
-    "@langchain/core": "^1.2.1",
-    "@langchain/google-genai": "^2.2.0",
-    "@langchain/langgraph": "^1.4.7",
-    "@langchain/tavily": "^1.2.0",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "uuid": "^14.0.1",
-    "zod": "^4.4.3"
-  }
+  "license": "MIT"
 }
