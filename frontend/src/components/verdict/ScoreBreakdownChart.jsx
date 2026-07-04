@@ -12,8 +12,15 @@ import {
 } from 'recharts';
 
 /**
- * ScoreBreakdownChart component — renders horizontal bar chart of the 5 weighted dimensions
- * plus the negative risk penalty bar.
+ * ScoreBreakdownChart component — horizontal bar chart using strict boardroom 5-color palette:
+ * - Ink (#12181B)
+ * - Parchment (#F6F1E7)
+ * - Brass (#B8860B)
+ * - Ledger-Green (#2F6F4E)
+ * - Claret (#7A2E2E)
+ * - Slate (#4A5A63)
+ *
+ * Fixed: Single YAxis component to prevent text overlap artifact.
  *
  * @param {{ scores: import('../../types/research.js').ScoreBreakdown }} props
  */
@@ -24,75 +31,76 @@ export function ScoreBreakdownChart({ scores }) {
     {
       name: 'Market Position (25%)',
       score: scores.marketPosition ?? 0,
-      color: '#3b82f6', // blue
+      color: '#B8860B', // brass
     },
     {
       name: 'Financial Health (25%)',
       score: scores.financialHealth ?? 0,
-      color: '#10b981', // emerald
+      color: '#2F6F4E', // ledger-green
     },
     {
       name: 'Growth Trajectory (20%)',
       score: scores.growthTrajectory ?? 0,
-      color: '#8b5cf6', // purple
+      color: '#B8860B', // brass
     },
     {
       name: 'Bear-Adjusted (15%)',
       score: scores.bearAdjustedConviction ?? 0,
-      color: '#06b6d4', // cyan
+      color: '#2F6F4E', // ledger-green
     },
     {
       name: 'Source Quality (10%)',
       score: scores.sourceQuality ?? 0,
-      color: '#64748b', // slate
+      color: '#4A5A63', // slate
     },
     {
       name: 'Risk Penalty',
       score: scores.riskPenalty ? -Math.abs(scores.riskPenalty) : 0,
-      color: '#f43f5e', // rose negative bar
+      color: '#7A2E2E', // claret negative bar
     },
   ];
 
   return (
-    <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl mb-8">
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+    <div className="w-full max-w-4xl mx-auto bg-[#12181B] border border-[#4A5A63]/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#4A5A63]/40">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
+          <h3 className="text-base font-serif font-bold text-[#F6F1E7] flex items-center gap-2">
             📊 Committee Score Breakdown
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[#4A5A63] mt-0.5 font-sans">
             Weighted dimension scores (0-100) & risk penalty subtraction
           </p>
         </div>
-        <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
+        <div className="flex items-center gap-4 text-xs font-mono text-[#4A5A63]">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Positive Dimension
+            <span className="w-2.5 h-2.5 rounded-full bg-[#B8860B]"></span> Dimension Score
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Risk Penalty
+            <span className="w-2.5 h-2.5 rounded-full bg-[#7A2E2E]"></span> Risk Penalty
           </span>
         </div>
       </div>
 
-      <div className="w-full h-72">
+      <div className="w-full h-72 sm:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"
             data={data}
-            margin={{ top: 10, right: 30, left: 140, bottom: 5 }}
+            margin={{ top: 10, right: 25, left: 10, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#4A5A63" opacity={0.3} horizontal={false} />
             <XAxis
               type="number"
               domain={[-25, 100]}
-              stroke="#64748b"
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
+              stroke="#4A5A63"
+              tick={{ fill: '#4A5A63', fontSize: 11 }}
             />
+            {/* Single YAxis to guarantee no label overlapping */}
             <YAxis
               type="category"
               dataKey="name"
-              stroke="#64748b"
-              tick={{ fill: '#cbd5e1', fontSize: 12, fontWeight: 500 }}
+              stroke="#4A5A63"
+              tick={{ fill: '#F6F1E7', fontSize: 11, fontWeight: 500 }}
               width={140}
             />
             <Tooltip
@@ -101,9 +109,9 @@ export function ScoreBreakdownChart({ scores }) {
                   const item = payload[0].payload;
                   const val = item.score;
                   return (
-                    <div className="bg-slate-950 border border-slate-700 p-2.5 rounded-lg shadow-xl text-xs font-mono">
-                      <p className="font-semibold text-white mb-1">{item.name}</p>
-                      <p className={val < 0 ? 'text-rose-400' : 'text-emerald-400'}>
+                    <div className="bg-[#12181B] border border-[#4A5A63] p-2.5 rounded-xl shadow-xl text-xs font-mono text-[#F6F1E7]">
+                      <p className="font-serif font-bold text-[#F6F1E7] mb-1">{item.name}</p>
+                      <p className={val < 0 ? 'text-[#7A2E2E] font-bold' : 'text-[#B8860B] font-bold'}>
                         {val < 0 ? `Penalty: ${val}` : `Score: ${val} / 100`}
                       </p>
                     </div>
@@ -112,7 +120,7 @@ export function ScoreBreakdownChart({ scores }) {
                 return null;
               }}
             />
-            <ReferenceLine x={0} stroke="#475569" strokeWidth={1.5} />
+            <ReferenceLine x={0} stroke="#4A5A63" strokeWidth={1.5} />
             <Bar dataKey="score" radius={[0, 6, 6, 0]} barSize={22}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />

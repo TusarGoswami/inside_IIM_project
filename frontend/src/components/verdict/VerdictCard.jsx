@@ -1,8 +1,12 @@
 import React from 'react';
 
 /**
- * VerdictCard component — sticky top verdict card with color-coded badge,
- * conviction score radial gauge, and narrative thesis summary.
+ * VerdictCard component — top verdict banner card with solid opacity boardroom palette:
+ * - Invest: ledger-green (#2F6F4E)
+ * - Watchlist: brass (#B8860B)
+ * - Pass: claret (#7A2E2E)
+ *
+ * Fixed: Solid opacity background and relative positioning to prevent scroll bleed & overlapping text artifacts.
  *
  * @param {{
  *   verdict: "Invest" | "Watchlist" | "Pass",
@@ -17,85 +21,82 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
     switch (verdict) {
       case 'Invest':
         return {
-          bg: 'bg-emerald-500/10',
-          border: 'border-emerald-500/30',
-          badgeBg: 'bg-emerald-500 text-slate-950',
-          text: 'text-emerald-400',
-          stroke: '#10b981', // emerald-500
-          glow: 'shadow-emerald-500/20',
+          cardBg: 'bg-[#182420]',
+          border: 'border-[#2F6F4E]',
+          badgeBg: 'bg-[#2F6F4E] text-[#F6F1E7]',
+          stroke: '#2F6F4E',
+          text: 'text-[#2F6F4E]',
         };
       case 'Watchlist':
         return {
-          bg: 'bg-amber-500/10',
-          border: 'border-amber-500/30',
-          badgeBg: 'bg-amber-500 text-slate-950',
-          text: 'text-amber-400',
-          stroke: '#f59e0b', // amber-500
-          glow: 'shadow-amber-500/20',
+          cardBg: 'bg-[#242018]',
+          border: 'border-[#B8860B]',
+          badgeBg: 'bg-[#B8860B] text-[#12181B]',
+          stroke: '#B8860B',
+          text: 'text-[#B8860B]',
         };
       case 'Pass':
       default:
         return {
-          bg: 'bg-rose-500/10',
-          border: 'border-rose-500/30',
-          badgeBg: 'bg-rose-500 text-white',
-          text: 'text-rose-400',
-          stroke: '#f43f5e', // rose-500
-          glow: 'shadow-rose-500/20',
+          cardBg: 'bg-[#241818]',
+          border: 'border-[#7A2E2E]',
+          badgeBg: 'bg-[#7A2E2E] text-[#F6F1E7]',
+          stroke: '#7A2E2E',
+          text: 'text-[#7A2E2E]',
         };
     }
   };
 
   const style = getVerdictStyle();
 
-  // Gauge calculation (radial SVG arc)
-  const radius = 40;
+  // Radial gauge calculation
+  const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const clampedConviction = Math.max(0, Math.min(100, conviction));
   const strokeDashoffset = circumference - (clampedConviction / 100) * circumference;
 
   return (
-    <div className={`sticky top-4 z-30 w-full max-w-4xl mx-auto ${style.bg} backdrop-blur-md border ${style.border} rounded-2xl p-6 shadow-2xl ${style.glow} mb-8 transition-all duration-300`}>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+    <div className={`w-full max-w-4xl mx-auto ${style.cardBg} border ${style.border} rounded-2xl p-5 sm:p-7 shadow-2xl transition-all duration-300 mb-8`}>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         
         {/* Left: Company & Verdict Badge */}
-        <div className="flex-1 text-center sm:text-left">
-          <div className="flex items-center justify-center sm:justify-start gap-3 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Final IC Verdict
+        <div className="flex-1 text-center md:text-left w-full">
+          <div className="flex items-center justify-center md:justify-start gap-2.5 mb-2">
+            <span className="text-xs font-mono uppercase tracking-widest text-[#4A5A63] font-semibold">
+              Final Committee Verdict
             </span>
-            <span className="text-xs text-slate-600">•</span>
-            <span className="text-xs font-mono text-slate-400 font-medium">{companyName}</span>
+            <span className="text-xs text-[#4A5A63]">•</span>
+            <span className="text-xs font-sans text-[#F6F1E7] font-bold">{companyName}</span>
           </div>
 
-          <div className="flex items-center justify-center sm:justify-start gap-4 mb-3">
-            <span className={`text-3xl sm:text-4xl font-black uppercase tracking-tight px-4 py-1.5 rounded-xl font-mono shadow-lg ${style.badgeBg}`}>
+          <div className="flex items-center justify-center md:justify-start mb-3">
+            <span className={`text-2xl sm:text-4xl font-serif font-black uppercase tracking-wider px-5 py-2 rounded-xl font-mono shadow-md ${style.badgeBg}`}>
               {verdict || 'PENDING'}
             </span>
           </div>
 
           {thesisSummary && (
-            <p className="text-sm text-slate-300 leading-relaxed font-sans max-w-2xl">
+            <p className="text-sm text-[#F6F1E7]/90 leading-relaxed font-sans max-w-2xl text-left">
               {thesisSummary}
             </p>
           )}
         </div>
 
-        {/* Right: Conviction Radial Gauge + Reset button */}
-        <div className="flex items-center gap-6 shrink-0">
+        {/* Right: Radial Gauge & Action Button (44px min tap target) */}
+        <div className="flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-[#4A5A63]/30 shrink-0">
+          
+          {/* Gauge + Label Block */}
           <div className="flex flex-col items-center">
-            <div className="relative w-24 h-24 flex items-center justify-center">
+            <div className="relative w-20 h-20 sm:w-22 sm:h-22 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                {/* Background circle */}
                 <circle
                   cx="50"
                   cy="50"
                   r={radius}
-                  className="stroke-slate-800"
+                  className="stroke-[#12181B]"
                   strokeWidth="8"
                   fill="transparent"
                 />
-                {/* Progress arc */}
                 <circle
                   cx="50"
                   cy="50"
@@ -109,22 +110,23 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
                   className="transition-all duration-1000 ease-out"
                 />
               </svg>
-              {/* Score text */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-2xl font-black text-white font-mono leading-none">
+              {/* Score number perfectly centered inside circle */}
+              <div className="absolute inset-0 flex items-center justify-center text-center">
+                <span className="text-2xl sm:text-3xl font-black text-[#F6F1E7] font-mono leading-none">
                   {clampedConviction}
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mt-0.5">
-                  Conviction
                 </span>
               </div>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium mt-1">Scale 0 - 100</span>
+            {/* Label placed cleanly below circle */}
+            <span className="text-[10px] uppercase font-bold tracking-widest text-[#4A5A63] mt-1 font-mono">
+              Conviction
+            </span>
           </div>
 
+          {/* Action Button */}
           <button
             onClick={onReset}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition-all shadow-md hover:text-white cursor-pointer"
+            className="min-h-[44px] px-5 py-2.5 bg-[#12181B] hover:bg-[#1f292d] active:bg-[#2a373d] text-[#F6F1E7] border border-[#4A5A63] rounded-xl text-xs font-semibold uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
           >
             ← New Research
           </button>
