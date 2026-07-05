@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 
 /**
- * RiskFlags component — displays severity-coded risk flag badges using exact 5-color palette.
- * Palette:
- * - Critical / High: Claret (#7A2E2E)
- * - Medium: Brass (#B8860B)
- * - Low: Slate (#4A5A63)
- *
- * Clickable cards (min 44px height on mobile) to expand detail text.
+ * RiskFlags component — Stamped Red Flag Labels (Dossier Audit Scan).
+ * Aesthetic: Small stamped labels ("FLAGGED — HIGH SEVERITY"), manila paper cards, typewriter font.
  *
  * @param {{ riskFlags?: import('../../types/research.js').RiskFlag[] }} props
  */
@@ -16,45 +11,52 @@ export function RiskFlags({ riskFlags = [] }) {
 
   if (!riskFlags || riskFlags.length === 0) {
     return (
-      <div className="w-full max-w-4xl mx-auto bg-[#12181B] border border-[#4A5A63]/60 rounded-2xl p-6 shadow-2xl mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[#2F6F4E] font-bold">🛡️ Risk Audit Scan</span>
-        </div>
-        <p className="text-xs text-[#4A5A63]">No concrete red flags or critical risks identified during due diligence audit.</p>
+      <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-6 shadow-[6px_6px_0px_#22201B] mb-8 staple-clip">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#6B6353] block font-bold mb-1">
+          EXHIBIT C — DUE DILIGENCE AUDIT SCAN
+        </span>
+        <h3 className="text-base font-serif font-bold text-[#3E6B4F] flex items-center gap-2">
+          [ AUDIT CLEAN — NO CRITICAL RED FLAGS IDENTIFIED ]
+        </h3>
+        <p className="text-xs text-[#22201B]/80 mt-1 font-sans">No concrete red flags or critical risks identified during due diligence audit.</p>
       </div>
     );
   }
 
-  const getSeverityBadge = (severity) => {
+  const getSeverityStamp = (severity) => {
     switch (severity) {
       case 'critical':
         return {
-          bg: 'bg-[#7A2E2E]/25 hover:bg-[#7A2E2E]/35',
-          border: 'border-[#7A2E2E]',
-          text: 'text-[#F6F1E7]',
-          pill: 'bg-[#7A2E2E] text-[#F6F1E7] font-black',
+          cardBg: 'bg-[#EDE4D3]',
+          borderColor: 'border-[#8B2E2E]',
+          shadow: 'shadow-[3px_3px_0px_#8B2E2E]',
+          stampClass: 'stamp-pass',
+          label: 'FLAGGED — CRITICAL SEVERITY',
         };
       case 'high':
         return {
-          bg: 'bg-[#7A2E2E]/15 hover:bg-[#7A2E2E]/25',
-          border: 'border-[#7A2E2E]/60',
-          text: 'text-[#F6F1E7]',
-          pill: 'bg-[#7A2E2E]/80 text-[#F6F1E7] font-bold',
+          cardBg: 'bg-[#EDE4D3]',
+          borderColor: 'border-[#8B2E2E]',
+          shadow: 'shadow-[3px_3px_0px_#8B2E2E]',
+          stampClass: 'stamp-pass',
+          label: 'FLAGGED — HIGH SEVERITY',
         };
       case 'medium':
         return {
-          bg: 'bg-[#B8860B]/15 hover:bg-[#B8860B]/25',
-          border: 'border-[#B8860B]/50',
-          text: 'text-[#F6F1E7]',
-          pill: 'bg-[#B8860B] text-[#12181B] font-bold',
+          cardBg: 'bg-[#EDE4D3]',
+          borderColor: 'border-[#A9772E]',
+          shadow: 'shadow-[3px_3px_0px_#A9772E]',
+          stampClass: 'stamp-watchlist',
+          label: 'FLAGGED — MEDIUM SEVERITY',
         };
       case 'low':
       default:
         return {
-          bg: 'bg-[#12181B] hover:bg-[#1f292d]',
-          border: 'border-[#4A5A63]/60',
-          text: 'text-[#F6F1E7]',
-          pill: 'bg-[#4A5A63] text-[#F6F1E7] font-semibold',
+          cardBg: 'bg-[#EDE4D3]',
+          borderColor: 'border-[#22201B]',
+          shadow: 'shadow-[3px_3px_0px_#22201B]',
+          stampClass: 'text-[#6B6353] border-[#6B6353]',
+          label: 'FLAGGED — LOW SEVERITY',
         };
     }
   };
@@ -64,44 +66,50 @@ export function RiskFlags({ riskFlags = [] }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-[#12181B] border border-[#4A5A63]/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#4A5A63]/40">
+    <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-4 sm:p-6 shadow-[6px_6px_0px_#22201B] mb-8 staple-clip">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-[#22201B]">
         <div>
-          <h3 className="text-base sm:text-lg font-serif font-bold text-[#F6F1E7] flex items-center gap-2">
-            🛡️ Risk Auditor Scan & Red Flags
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#6B6353] block font-bold">
+            EXHIBIT C — DUE DILIGENCE AUDIT SCAN
+          </span>
+          <h3 className="text-base sm:text-lg font-serif font-bold text-[#22201B] flex items-center gap-2 mt-0.5">
+            RISK AUDITOR RED FLAGS ({riskFlags.length} DETECTED)
           </h3>
-          <p className="text-xs text-[#4A5A63] mt-0.5 font-sans">
-            Governance, regulatory, financial distress & competitive risks ({riskFlags.length} flags found)
+          <p className="text-xs text-[#6B6353] font-sans">
+            Governance, regulatory, financial distress & competitive risks
           </p>
         </div>
-        <span className="text-[11px] text-[#4A5A63] font-mono hidden sm:inline">Click flag to toggle detail</span>
+        <span className="text-[11px] text-[#22201B] font-mono font-bold hidden sm:inline">[ CLICK FLAG TO EXPAND ]</span>
       </div>
 
+      {/* Grid of Stamped Labels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {riskFlags.map((flag, idx) => {
-          const badgeStyle = getSeverityBadge(flag.severity);
+          const stampStyle = getSeverityStamp(flag.severity);
           const isExpanded = expandedIndex === idx;
 
           return (
             <div
               key={idx}
               onClick={() => toggleExpand(idx)}
-              className={`min-h-[44px] p-3.5 rounded-xl border ${badgeStyle.bg} ${badgeStyle.border} transition-all cursor-pointer select-none flex flex-col justify-center`}
+              className={`min-h-[44px] p-3.5 border-2 ${stampStyle.cardBg} ${stampStyle.borderColor} ${stampStyle.shadow} transition-all cursor-pointer select-none flex flex-col justify-center`}
             >
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded ${badgeStyle.pill} shrink-0`}>
-                    {flag.severity}
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className={`text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 border inline-block self-start ${stampStyle.stampClass}`}>
+                    {stampStyle.label}
                   </span>
-                  <span className={`text-xs font-bold truncate ${badgeStyle.text}`}>
+                  <span className="text-xs font-mono font-bold text-[#22201B] truncate">
                     {flag.label}
                   </span>
                 </div>
-                <span className="text-[#4A5A63] text-xs shrink-0">{isExpanded ? '▲' : '▼'}</span>
+                <span className="text-[#22201B] font-mono font-bold text-xs shrink-0">{isExpanded ? '▲' : '▼'}</span>
               </div>
 
               {isExpanded && (
-                <div className="mt-2.5 pt-2 border-t border-[#4A5A63]/40 text-xs text-[#F6F1E7]/90 leading-relaxed font-sans">
+                <div className="mt-2.5 pt-2 border-t border-[#22201B]/30 text-xs text-[#22201B] leading-relaxed font-sans bg-[#D9CBA8]/40 p-2 border">
                   {flag.detail}
                 </div>
               )}
