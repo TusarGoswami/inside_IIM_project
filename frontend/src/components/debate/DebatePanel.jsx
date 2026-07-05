@@ -45,11 +45,16 @@ export function DebatePanel({ bullCase, bearCase, rebuttalOccurred, rebuttal }) 
         <div className="bg-[#2F6F4E]/10 border border-[#2F6F4E]/30 rounded-xl p-4 sm:p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#2F6F4E]/30">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#2F6F4E]"></span>
-                <h4 className="text-sm sm:text-base font-serif font-bold text-[#2F6F4E] uppercase tracking-wide">
-                  Bull Case
-                </h4>
+              <div className="flex items-start gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#2F6F4E] mt-1 shrink-0"></span>
+                <div>
+                  <h4 className="text-sm sm:text-base font-serif font-bold text-[#2F6F4E] uppercase tracking-wide leading-snug">
+                    Bull Case
+                  </h4>
+                  <p className="text-[11px] text-[#4A5A63] font-sans font-normal normal-case tracking-normal mt-0.5">
+                    The case FOR investing
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-1 bg-[#2F6F4E]/20 px-3 py-1 rounded-lg border border-[#2F6F4E]/40 text-xs font-mono text-[#F6F1E7] font-bold">
                 Strength: {bullCase?.strength ?? 0}/100
@@ -79,11 +84,16 @@ export function DebatePanel({ bullCase, bearCase, rebuttalOccurred, rebuttal }) 
         <div className="bg-[#7A2E2E]/10 border border-[#7A2E2E]/30 rounded-xl p-4 sm:p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#7A2E2E]/30">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#7A2E2E]"></span>
-                <h4 className="text-sm sm:text-base font-serif font-bold text-[#7A2E2E] uppercase tracking-wide">
-                  Bear Case
-                </h4>
+              <div className="flex items-start gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#7A2E2E] mt-1 shrink-0"></span>
+                <div>
+                  <h4 className="text-sm sm:text-base font-serif font-bold text-[#7A2E2E] uppercase tracking-wide leading-snug">
+                    Bear Case
+                  </h4>
+                  <p className="text-[11px] text-[#4A5A63] font-sans font-normal normal-case tracking-normal mt-0.5">
+                    The case AGAINST investing
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-1 bg-[#7A2E2E]/20 px-3 py-1 rounded-lg border border-[#7A2E2E]/40 text-xs font-mono text-[#F6F1E7] font-bold">
                 Strength: {bearCase?.strength ?? 0}/100
@@ -115,9 +125,19 @@ export function DebatePanel({ bullCase, bearCase, rebuttalOccurred, rebuttal }) 
       {rebuttalOccurred && rebuttal && (
         <div className="mt-6 pt-6 border-t border-[#4A5A63]/40">
           <div className="bg-[#B8860B]/10 border border-[#B8860B]/30 rounded-xl p-4 sm:p-5">
-            <h4 className="text-xs sm:text-sm font-serif font-bold text-[#B8860B] uppercase tracking-wider mb-4 flex items-center gap-2">
-              <span>🔄</span> Rebuttal Round: Counter-Arguments
-            </h4>
+            <div className="mb-4">
+              <div className="flex items-start gap-2">
+                <span className="text-xs sm:text-sm shrink-0 mt-0.5">🔄</span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-serif font-bold text-[#B8860B] uppercase tracking-wider leading-snug">
+                    Rebuttal Round: Counter-Arguments
+                  </h4>
+                  <p className="text-[11px] text-[#4A5A63] font-sans font-normal normal-case tracking-normal mt-0.5">
+                    Each side responds to the other's strongest point
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Bull Rebuttal */}
