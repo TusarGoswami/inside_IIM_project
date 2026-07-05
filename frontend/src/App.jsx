@@ -21,37 +21,39 @@ export default function App() {
   const isRateLimitError = error?.includes('rate limit') || error?.includes('429') || error?.includes('Quota');
 
   return (
-    <div className="min-h-screen bg-[#12181B] text-[#F6F1E7] font-sans selection:bg-[#B8860B] selection:text-[#12181B]">
-      {/* Top Navbar */}
-      <header className="border-b border-[#4A5A63]/40 bg-[#12181B]/90 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+    <div className="min-h-screen bg-[#EDE4D3] text-[#22201B] font-sans selection:bg-[#D9CBA8] selection:text-[#22201B] border-t-4 border-[#22201B]">
+      {/* Top Header - Classified Investment Dossier Header */}
+      <header className="border-b-2 border-[#22201B] bg-[#D9CBA8] sticky top-0 z-40 shadow-sm">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+          
+          {/* Brand / Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={resetSession}>
-            <img
-              src="/logo.jpg"
-              alt="The Deal Desk Logo"
-              className="w-10 h-10 rounded-full border border-[#B8860B]/60 shadow-md object-cover bg-[#F6F1E7]"
-            />
+            <div className="w-9 h-9 border-2 border-[#22201B] bg-[#EDE4D3] flex items-center justify-center font-mono font-bold text-xs shadow-[2px_2px_0px_#22201B]">
+              DD
+            </div>
             <div>
-              <span className="font-serif font-bold text-lg text-[#F6F1E7] tracking-tight block leading-none">
-                The Deal Desk
+              <span className="font-serif font-bold text-lg text-[#22201B] tracking-tight block leading-none">
+                THE DEAL DESK
               </span>
-              <span className="text-[10px] font-mono text-[#4A5A63] uppercase tracking-widest block mt-0.5">
-                AI Investment Committee Simulator
+              <span className="text-[10px] font-mono text-[#6B6353] uppercase tracking-widest block mt-0.5 font-semibold">
+                INVESTMENT COMMITTEE DOSSIER SYSTEM
               </span>
             </div>
           </div>
 
+          {/* Dossier Control Tags */}
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#12181B] border border-[#4A5A63]/60 text-xs font-mono text-[#B8860B]">
-              <span className="w-2 h-2 rounded-full bg-[#2F6F4E]"></span>
-              Gemini + LangGraph Engine
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EDE4D3] border border-[#22201B] text-xs font-mono text-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]">
+              <span className="w-2 h-2 bg-[#3E6B4F]"></span>
+              CONFIDENTIAL // FORM 10-IC
             </span>
           </div>
+
         </div>
       </header>
 
-      {/* Main Container - max-w-6xl so it doesn't stretch edge-to-edge on 1440px+ displays */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      {/* Main Dossier Container */}
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
         
         {/* VIEW 1: Input View */}
         {stage === STAGES.IDLE && (
@@ -79,18 +81,18 @@ export default function App() {
           </div>
         )}
 
-        {/* Error State - Responsive & Clean */}
+        {/* Error State - Red Stamped Rejection Box */}
         {stage === STAGES.ERROR && (
-          <div className="w-full max-w-xl mx-auto bg-[#241818] border border-[#7A2E2E] rounded-2xl p-5 sm:p-8 text-center shadow-2xl animate-fade-in my-6">
-            <div className="w-12 h-12 rounded-full bg-[#7A2E2E]/30 text-[#F6F1E7] flex items-center justify-center mx-auto mb-4 text-2xl font-bold border border-[#7A2E2E]">
-              ✕
+          <div className="w-full max-w-xl mx-auto bg-[#EDE4D3] border-2 border-[#8B2E2E] p-5 sm:p-8 text-center shadow-[4px_4px_0px_#8B2E2E] animate-fade-in my-6">
+            <div className="inline-block px-4 py-1 border-2 border-[#8B2E2E] text-[#8B2E2E] font-mono font-bold text-xs uppercase tracking-widest mb-4">
+              [SYSTEM ERROR / EXECUTION ABORTED]
             </div>
             
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#F6F1E7] mb-2">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#8B2E2E] mb-2">
               {isRateLimitError ? 'API Rate Limit Reached' : 'Research Session Failed'}
             </h2>
             
-            <p className="text-xs sm:text-sm text-[#F6F1E7]/90 mb-5 leading-relaxed font-sans max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-[#22201B] mb-5 leading-relaxed font-sans max-w-md mx-auto">
               {isRateLimitError
                 ? 'The Gemini API free-tier rate limit window was temporarily reached. Please wait 15–20 seconds for the quota window to reset, then click Try Again.'
                 : 'An error occurred during committee agent execution.'}
@@ -100,13 +102,13 @@ export default function App() {
             <div className="mb-6">
               <button
                 onClick={() => setShowTechDetails(!showTechDetails)}
-                className="text-[11px] font-mono text-[#4A5A63] hover:text-[#F6F1E7] underline transition-colors cursor-pointer"
+                className="text-[11px] font-mono text-[#6B6353] hover:text-[#22201B] underline transition-colors cursor-pointer"
               >
                 {showTechDetails ? 'Hide Details ▲' : 'Show Technical Error Details ▾'}
               </button>
 
               {showTechDetails && (
-                <div className="mt-3 p-3 bg-[#12181B] border border-[#4A5A63]/50 rounded-xl text-left text-[11px] font-mono text-[#F6F1E7]/80 break-all max-h-40 overflow-y-auto">
+                <div className="mt-3 p-3 bg-[#D9CBA8] border border-[#22201B] text-left text-[11px] font-mono text-[#22201B] break-all max-h-40 overflow-y-auto">
                   {error}
                 </div>
               )}
@@ -114,9 +116,9 @@ export default function App() {
 
             <button
               onClick={resetSession}
-              className="min-h-[44px] px-8 py-3 bg-[#7A2E2E] hover:bg-[#913737] active:bg-[#612424] text-[#F6F1E7] font-bold uppercase tracking-wider rounded-xl text-xs sm:text-sm transition-all shadow-lg cursor-pointer"
+              className="min-h-[44px] px-8 py-3 bg-[#8B2E2E] hover:bg-[#a33737] active:bg-[#722525] text-[#EDE4D3] font-mono font-bold uppercase tracking-wider text-xs sm:text-sm border-2 border-[#22201B] shadow-[3px_3px_0px_#22201B] transition-all cursor-pointer"
             >
-              Try Again →
+              RE-INITIATE DOSSIER →
             </button>
           </div>
         )}
@@ -153,16 +155,21 @@ export default function App() {
 
             {/* Research Sources List - Collapsible on mobile (<640px) */}
             {state.research?.sources?.length > 0 && (
-              <div className="w-full max-w-4xl mx-auto bg-[#12181B] border border-[#4A5A63]/60 rounded-2xl p-4 sm:p-6 shadow-2xl">
+              <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-4 sm:p-6 shadow-[4px_4px_0px_#22201B]">
                 <button
                   onClick={() => setSourcesOpen(!sourcesOpen)}
-                  className="w-full flex items-center justify-between text-left cursor-pointer sm:cursor-default min-h-[44px]"
+                  className="w-full flex items-center justify-between text-left cursor-pointer min-h-[44px]"
                 >
-                  <h3 className="text-sm font-serif font-bold text-[#F6F1E7] uppercase tracking-wider flex items-center gap-2">
-                    🔗 Primary Web Sources ({state.research.sources.length})
-                  </h3>
-                  <span className="text-xs text-[#4A5A63] font-mono sm:hidden">
-                    {sourcesOpen ? 'Collapse ▲' : 'Expand ▾'}
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#6B6353] block font-bold">
+                      EXHIBIT A — EVIDENCE ATTACHMENTS
+                    </span>
+                    <h3 className="text-sm font-serif font-bold text-[#22201B] uppercase tracking-wider flex items-center gap-2 mt-0.5">
+                      PRIMARY WEB SOURCES ({state.research.sources.length})
+                    </h3>
+                  </div>
+                  <span className="text-xs text-[#22201B] font-mono font-bold sm:hidden">
+                    {sourcesOpen ? 'COLLAPSE ▲' : 'EXPAND ▾'}
                   </span>
                 </button>
 
@@ -173,12 +180,12 @@ export default function App() {
                       href={src.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-3 rounded-xl bg-[#12181B] border border-[#4A5A63]/40 hover:border-[#B8860B] transition-all group block min-h-[44px]"
+                      className="p-3 bg-[#EDE4D3] border border-[#22201B] hover:bg-[#EDE4D3]/80 transition-all group block min-h-[44px] shadow-[2px_2px_0px_#22201B]"
                     >
-                      <span className="text-xs font-semibold text-[#F6F1E7] group-hover:text-[#B8860B] block truncate mb-1">
-                        {src.title || 'Web Source'}
+                      <span className="text-xs font-mono font-bold text-[#22201B] group-hover:underline block truncate mb-1">
+                        [{i + 1}] {src.title || 'Web Source'}
                       </span>
-                      <span className="text-[10px] font-mono text-[#4A5A63] block truncate">
+                      <span className="text-[10px] font-mono text-[#6B6353] block truncate">
                         {src.url}
                       </span>
                     </a>
@@ -191,9 +198,9 @@ export default function App() {
             <div className="text-center py-6">
               <button
                 onClick={resetSession}
-                className="min-h-[44px] px-8 py-3.5 bg-[#B8860B] hover:bg-[#966d09] active:bg-[#7a5807] text-[#12181B] font-bold uppercase tracking-wider rounded-xl shadow-xl shadow-[#B8860B]/20 transition-all cursor-pointer text-sm"
+                className="min-h-[44px] px-8 py-3.5 bg-[#22201B] hover:bg-[#38352e] active:bg-[#151411] text-[#EDE4D3] font-mono font-bold uppercase tracking-wider shadow-[4px_4px_0px_#6B6353] transition-all cursor-pointer text-sm border-2 border-[#22201B]"
               >
-                Evaluate Another Company →
+                EVALUATE ANOTHER DOSSIER →
               </button>
             </div>
 
