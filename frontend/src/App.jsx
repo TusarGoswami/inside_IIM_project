@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logoSvg from './assets/logo.svg';
 import { useResearchSession } from './hooks/useResearchSession.js';
 import { STAGES } from './types/research.js';
 import { CompanyInput } from './components/input/CompanyInput.jsx';
@@ -24,13 +25,15 @@ export default function App() {
     <div className="min-h-screen bg-[#EDE4D3] text-[#22201B] font-sans selection:bg-[#D9CBA8] selection:text-[#22201B] border-t-4 border-[#22201B]">
       {/* Top Header - Classified Investment Dossier Header */}
       <header className="border-b-2 border-[#22201B] bg-[#D9CBA8] sticky top-0 z-40 shadow-sm">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
           
           {/* Brand / Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={resetSession}>
-            <div className="w-9 h-9 border-2 border-[#22201B] bg-[#EDE4D3] flex items-center justify-center font-mono font-bold text-xs shadow-[2px_2px_0px_#22201B]">
-              DD
-            </div>
+            <img
+              src={logoSvg}
+              alt="The Deal Desk Stamp Logo"
+              className="w-10 h-10 object-contain shrink-0"
+            />
             <div>
               <span className="font-serif font-bold text-lg text-[#22201B] tracking-tight block leading-none">
                 THE DEAL DESK
