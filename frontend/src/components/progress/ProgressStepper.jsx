@@ -4,40 +4,40 @@ import { STAGES } from '../../types/research.js';
 const STEP_CONFIG = [
   {
     key: STAGES.RESEARCHING,
-    title: '1. Web Research & Extraction',
-    shortTitle: '1. Research',
+    title: 'SECTION 1 — WEB RESEARCH & EXTRACTION',
+    shortTitle: 'SEC 1: RESEARCH',
     description: 'Scanning live market sources, financial filings, competitors, and sentiment',
   },
   {
     key: STAGES.WRITING_MEMO,
-    title: '2. Investment Memo Drafting',
-    shortTitle: '2. Memo',
+    title: 'SECTION 2 — IC INVESTMENT MEMO DRAFT',
+    shortTitle: 'SEC 2: MEMO',
     description: 'Synthesizing thesis, competitive moat, financial metrics, and data conflicts',
   },
   {
     key: STAGES.DEBATING,
-    title: '3. Parallel Bull vs. Bear Debate',
-    shortTitle: '3. Debate',
+    title: 'SECTION 3 — PARALLEL BULL VS BEAR DEBATE',
+    shortTitle: 'SEC 3: DEBATE',
     description: 'Running advocate nodes with evidence-backed scoring & conditional rebuttal',
   },
   {
     key: STAGES.AUDITING_RISK,
-    title: '4. Risk Audit & Governance Scan',
-    shortTitle: '4. Risk Audit',
+    title: 'SECTION 4 — DUE DILIGENCE RISK AUDIT',
+    shortTitle: 'SEC 4: RISK AUDIT',
     description: 'Auditing regulatory, financial distress, governance flags & data confidence caps',
   },
   {
     key: STAGES.VOTING,
-    title: '5. Committee Voting & Verdict',
-    shortTitle: '5. Voting',
+    title: 'SECTION 5 — VERDICT & CONVICTION COMPUTATION',
+    shortTitle: 'SEC 5: VERDICT',
     description: 'Calculating 5-dimension weighted score, risk penalty, and final verdict',
   },
 ];
 
 /**
- * ProgressStepper component — responsive progress stepper.
- * Switches between horizontal scrollable bar on mobile (< 640px) and vertical rail on desktop.
- * Palette: Ink (#12181B), Parchment (#F6F1E7), Brass (#B8860B), Ledger-Green (#2F6F4E), Claret (#7A2E2E), Slate (#4A5A63).
+ * ProgressStepper component — Stack of Folder Tabs (Dossier File Case Style).
+ * Each stage is represented as a physical folder tab that lifts/opens as work progresses.
+ * Mobile: Degradation into compact tab strip.
  *
  * @param {{ stage: string, reasoningTrail?: string[], error?: string }} props
  */
@@ -71,20 +71,26 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-[#12181B] border border-[#4A5A63]/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 border-b border-[#4A5A63]/40">
-        <h2 className="text-base sm:text-lg font-serif font-bold text-[#F6F1E7] flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#B8860B] animate-ping"></span>
-          Committee Session Progress
-        </h2>
-        <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-[#B8860B]/10 text-[#B8860B] border border-[#B8860B]/30">
-          SSE Stream Active
+    <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-4 sm:p-6 shadow-[6px_6px_0px_#22201B] mb-8 staple-clip">
+      
+      {/* Dossier Header */}
+      <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-[#22201B]">
+        <div>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#6B6353] block font-bold">
+            CASE FILE WORKFLOW STATUS
+          </span>
+          <h2 className="text-base sm:text-lg font-serif font-bold text-[#22201B] flex items-center gap-2 mt-0.5">
+            <span className="w-2.5 h-2.5 bg-[#3E6B4F] animate-pulse inline-block"></span>
+            DOSSIER EXECUTION PIPELINE
+          </h2>
+        </div>
+        <span className="text-[11px] font-mono px-3 py-1 bg-[#EDE4D3] text-[#22201B] border border-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]">
+          STREAM ACTIVE
         </span>
       </div>
 
-      {/* MOBILE (< 640px): Horizontal Scrollable Stepper */}
-      <div className="block sm:hidden mb-4">
+      {/* MOBILE (< 640px): Compact Horizontal Folder Tabs Strip */}
+      <div className="block sm:hidden mb-6">
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           {STEP_CONFIG.map((step, index) => {
             const status = getStepStatus(step.key);
@@ -92,99 +98,96 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
             return (
               <div
                 key={step.key}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs whitespace-nowrap shrink-0 ${
+                className={`flex items-center gap-2 px-3 py-2 border-2 text-xs font-mono whitespace-nowrap shrink-0 ${
                   status === 'completed'
-                    ? 'bg-[#2F6F4E]/20 border-[#2F6F4E] text-[#F6F1E7]'
+                    ? 'bg-[#3E6B4F]/10 border-[#3E6B4F] text-[#3E6B4F] font-bold'
                     : status === 'active'
-                    ? 'bg-[#B8860B]/20 border-[#B8860B] text-[#B8860B] font-bold'
+                    ? 'bg-[#EDE4D3] border-[#22201B] text-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]'
                     : status === 'error'
-                    ? 'bg-[#7A2E2E]/20 border-[#7A2E2E] text-[#F6F1E7]'
-                    : 'bg-[#12181B] border-[#4A5A63]/40 text-[#4A5A63]'
+                    ? 'bg-[#8B2E2E]/10 border-[#8B2E2E] text-[#8B2E2E] font-bold'
+                    : 'bg-[#D9CBA8] border-[#6B6353]/40 text-[#6B6353]'
                 }`}
               >
-                <span className="font-mono">{index + 1}.</span>
+                <span>[{index + 1}]</span>
                 <span>{step.shortTitle}</span>
-                {status === 'completed' && <span className="text-[#2F6F4E]">✓</span>}
-                {status === 'active' && <span className="w-2 h-2 rounded-full bg-[#B8860B] animate-pulse"></span>}
+                {status === 'completed' && <span>✓</span>}
+                {status === 'active' && <span className="animate-pulse">▶</span>}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* TABLET / DESKTOP (>= 640px): Vertical Stepper Rail */}
-      <div className="hidden sm:block relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#4A5A63]/40">
+      {/* DESKTOP / TABLET (>= 640px): Stacked Manila Folder Tabs */}
+      <div className="hidden sm:space-y-3 mb-6">
         {STEP_CONFIG.map((step, index) => {
           const status = getStepStatus(step.key);
 
           return (
-            <div key={step.key} className="relative flex items-start gap-4">
-              {/* Step indicator icon */}
-              <div className="absolute -left-6 top-0 flex items-center justify-center">
-                {status === 'completed' && (
-                  <span className="w-6 h-6 rounded-full bg-[#2F6F4E] text-[#F6F1E7] font-bold flex items-center justify-center text-xs shadow-md">
-                    ✓
+            <div
+              key={step.key}
+              className={`border-2 transition-all duration-200 ${
+                status === 'completed'
+                  ? 'bg-[#EDE4D3] border-[#22201B] shadow-[3px_3px_0px_#3E6B4F]'
+                  : status === 'active'
+                  ? 'bg-[#EDE4D3] border-[#22201B] shadow-[5px_5px_0px_#22201B] translate-x-1'
+                  : status === 'error'
+                  ? 'bg-[#EDE4D3] border-[#8B2E2E] shadow-[3px_3px_0px_#8B2E2E]'
+                  : 'bg-[#D9CBA8] border-[#6B6353]/50 opacity-70'
+              }`}
+            >
+              {/* Tab Handle Strip */}
+              <div className="flex items-center justify-between px-4 py-2.5 bg-[#EDE4D3]/60 border-b border-[#22201B]/30 font-mono text-xs">
+                <div className="flex items-center gap-3">
+                  <span className={`px-2 py-0.5 border text-[10px] font-bold ${
+                    status === 'completed' ? 'border-[#3E6B4F] text-[#3E6B4F] bg-[#3E6B4F]/10' :
+                    status === 'active' ? 'border-[#22201B] text-[#22201B] bg-[#22201B]/10' :
+                    status === 'error' ? 'border-[#8B2E2E] text-[#8B2E2E] bg-[#8B2E2E]/10' :
+                    'border-[#6B6353] text-[#6B6353]'
+                  }`}>
+                    TAB 0{index + 1}
                   </span>
-                )}
-                {status === 'active' && (
-                  <span className="relative flex h-6 w-6 items-center justify-center">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B8860B] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-[#B8860B]"></span>
-                  </span>
-                )}
-                {status === 'pending' && (
-                  <span className="w-6 h-6 rounded-full bg-[#12181B] border border-[#4A5A63] text-[#4A5A63] flex items-center justify-center text-xs font-mono">
-                    {index + 1}
-                  </span>
-                )}
-                {status === 'error' && (
-                  <span className="w-6 h-6 rounded-full bg-[#7A2E2E] text-[#F6F1E7] font-bold flex items-center justify-center text-xs shadow-md">
-                    ✕
-                  </span>
-                )}
-              </div>
-
-              {/* Step content */}
-              <div className="flex-1 pl-2">
-                <div className="flex items-center justify-between">
-                  <h3
-                    className={`text-sm font-semibold transition-colors ${
-                      status === 'completed'
-                        ? 'text-[#2F6F4E]'
-                        : status === 'active'
-                        ? 'text-[#B8860B] font-bold'
-                        : status === 'error'
-                        ? 'text-[#7A2E2E]'
-                        : 'text-[#4A5A63]'
-                    }`}
-                  >
+                  <h3 className={`font-mono font-bold tracking-wide uppercase ${
+                    status === 'completed' ? 'text-[#3E6B4F]' :
+                    status === 'active' ? 'text-[#22201B]' :
+                    status === 'error' ? 'text-[#8B2E2E]' :
+                    'text-[#6B6353]'
+                  }`}>
                     {step.title}
                   </h3>
-                  {status === 'active' && (
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#B8860B]/10 text-[#B8860B] border border-[#B8860B]/30 animate-pulse">
-                      In Progress
-                    </span>
-                  )}
                 </div>
-                <p className="text-xs text-[#4A5A63] mt-1 leading-relaxed">{step.description}</p>
+
+                <div className="font-mono text-[11px] font-bold">
+                  {status === 'completed' && <span className="text-[#3E6B4F]">[ COMPLETED ✓ ]</span>}
+                  {status === 'active' && <span className="text-[#22201B] animate-pulse">[ PROCESSING... ]</span>}
+                  {status === 'pending' && <span className="text-[#6B6353]">[ QUEUED ]</span>}
+                  {status === 'error' && <span className="text-[#8B2E2E]">[ FAILED ✕ ]</span>}
+                </div>
+              </div>
+
+              {/* Tab Description Body */}
+              <div className="px-4 py-2.5">
+                <p className="text-xs text-[#22201B]/80 font-sans">
+                  {step.description}
+                </p>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Live reasoning log ticker */}
+      {/* Live Committee Reasoning Log Ticker */}
       {reasoningTrail.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-[#4A5A63]/40">
-          <div className="text-[11px] font-mono uppercase text-[#B8860B] mb-2 flex items-center gap-1.5 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#B8860B]"></span>
-            Live Committee Reasoning Trail ({reasoningTrail.length} events)
+        <div className="pt-4 border-t-2 border-[#22201B]">
+          <div className="text-[11px] font-mono uppercase text-[#22201B] mb-2 flex items-center gap-2 font-bold tracking-wider">
+            <span className="w-2 h-2 bg-[#22201B]"></span>
+            AGENT REASONING LOG ({reasoningTrail.length} RECORDS):
           </div>
-          <div className="bg-[#12181B] border border-[#4A5A63]/50 rounded-xl p-3 max-h-36 overflow-y-auto font-mono text-xs text-[#F6F1E7]/80 space-y-1.5">
+          <div className="bg-[#EDE4D3] border-2 border-[#22201B] p-3 max-h-36 overflow-y-auto font-mono text-xs text-[#22201B] space-y-1.5 shadow-[inset_0_0_4px_rgba(0,0,0,0.1)]">
             {reasoningTrail.map((msg, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-[#B8860B] select-none">›</span>
-                <span className="leading-normal">{msg}</span>
+                <span className="text-[#6B6353] font-bold select-none">[{String(i+1).padStart(2, '0')}]</span>
+                <span className="leading-snug">{msg}</span>
               </div>
             ))}
           </div>
@@ -192,8 +195,8 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
       )}
 
       {error && (
-        <div className="mt-4 p-3 bg-[#7A2E2E]/20 border border-[#7A2E2E]/60 rounded-xl text-[#F6F1E7] text-xs flex items-center gap-2">
-          <span>⚠️</span>
+        <div className="mt-4 p-3 bg-[#EDE4D3] border-2 border-[#8B2E2E] text-[#8B2E2E] text-xs font-mono flex items-center gap-2 shadow-[2px_2px_0px_#8B2E2E]">
+          <span>[WARNING]</span>
           <span>{error}</span>
         </div>
       )}
