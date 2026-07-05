@@ -1,30 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #12181B;
-  --color-parchment: #F6F1E7;
-  --color-brass: #B8860B;
-  --color-ledger-green: #2F6F4E;
-  --color-claret: #7A2E2E;
-  --color-slate-custom: #4A5A63;
+  --color-manila: #EDE4D3;
+  --color-kraft: #D9CBA8;
+  --color-ink: #22201B;
+  --color-ink-muted: #6B6353;
+  --color-redact: #1A1815;
+  --color-stamp-red: #8B2E2E;
+  --color-stamp-green: #3E6B4F;
+  --color-stamp-amber: #A9772E;
 
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier Prime', monospace;
 }
 
 :root {
-  --ink: #12181B;
-  --parchment: #F6F1E7;
-  --brass: #B8860B;
-  --ledger-green: #2F6F4E;
-  --claret: #7A2E2E;
-  --slate: #4A5A63;
+  --manila: #EDE4D3;
+  --kraft: #D9CBA8;
+  --ink: #22201B;
+  --ink-muted: #6B6353;
+  --stamp-red: #8B2E2E;
+  --stamp-green: #3E6B4F;
+  --stamp-amber: #A9772E;
 }
 
 @layer base {
   body {
-    background-color: var(--ink);
-    color: var(--parchment);
+    background-color: #EDE4D3;
+    color: #22201B;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -34,27 +38,81 @@
   }
 }
 
-/* Custom Boardroom Scrollbar */
+/* Custom Typewriter / Vintage Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #12181B;
+  background: #D9CBA8;
+  border-left: 1px solid #22201B;
 }
 ::-webkit-scrollbar-thumb {
-  background: #4A5A63;
-  border-radius: 3px;
+  background: #6B6353;
+  border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8860B;
+  background: #22201B;
 }
 
-/* Paper texture feel for memo document */
+/* Aged Ruled Paper Background */
+.paper-ruled {
+  background-color: #EDE4D3;
+  background-image: repeating-linear-gradient(#EDE4D3 0px, #EDE4D3 23px, #D9CBA8 24px);
+}
+
+/* Typed Memo Sheet */
 .memo-paper {
-  background-color: #F6F1E7;
-  color: #12181B;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  background-color: #EDE4D3;
+  color: #22201B;
+  border: 1px solid #22201B;
+  box-shadow: 4px 4px 0px #22201B;
+}
+
+/* Rubber Stamp Styling */
+.rubber-stamp {
+  font-family: 'IBM Plex Mono', 'Courier Prime', monospace;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border: 3px double currentColor;
+  box-shadow: inset 0 0 0 1px currentColor;
+  text-shadow: 0 0 1px currentColor;
+}
+
+.stamp-invest {
+  color: #3E6B4F;
+  border-color: #3E6B4F;
+}
+
+.stamp-watchlist {
+  color: #A9772E;
+  border-color: #A9772E;
+}
+
+.stamp-pass {
+  color: #8B2E2E;
+  border-color: #8B2E2E;
+}
+
+/* Classified Paperclip / Staple Accent Primitives */
+.staple-clip {
+  position: relative;
+}
+.staple-clip::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 20px;
+  width: 28px;
+  height: 6px;
+  background: #6B6353;
+  border: 1px solid #22201B;
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 10;
 }
 
 @keyframes fadeIn {
@@ -63,5 +121,5 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
