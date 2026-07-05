@@ -8,8 +8,8 @@ const EXAMPLE_COMPANIES = [
 ];
 
 /**
- * CompanyInput component — boardroom hero input with clean serif title text.
- * Uses exact brand palette: ink (#12181B), parchment (#F6F1E7), brass (#B8860B), slate (#4A5A63).
+ * CompanyInput component — Classified Case File Requisition Form (Form 10-IC).
+ * Aesthetic: Warm Manila paper, kraft borders, typewriter mono text, rubber stamp submit.
  *
  * @param {{ onSubmit: (companyName: string) => void, isLoading: boolean }} props
  */
@@ -31,88 +31,91 @@ export function CompanyInput({ onSubmit, isLoading }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto text-center py-8 sm:py-16 px-4">
+    <div className="w-full max-w-[1200px] mx-auto text-center py-6 sm:py-12 px-4 animate-fade-in">
       
-      {/* Boardroom Header Badge */}
-      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#B8860B]/10 border border-[#B8860B]/30 text-[#B8860B] text-xs font-semibold uppercase tracking-widest mb-6">
-        <span className="w-2 h-2 rounded-full bg-[#B8860B] animate-pulse"></span>
-        Multi-Agent Investment Committee
-      </div>
-
-      {/* Main Title - Serif Display */}
-      <h1 className="text-4xl sm:text-6xl lg:text-7xl font-serif font-bold tracking-tight text-[#F6F1E7] mb-4 leading-tight">
-        The Deal Desk
-      </h1>
-
-      {/* Tagline */}
-      <p className="text-base sm:text-lg text-[#F6F1E7]/70 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-sans">
-        Simulate a Wall Street Investment Committee review. Enter any company to run real-time market research, thesis drafting, parallel Bull vs. Bear debate, risk audit, and deterministic conviction verdict.
-      </p>
-
-      {/* Input Form with 44px+ min tap target on mobile */}
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center max-w-2xl mx-auto shadow-2xl rounded-2xl bg-[#12181B] border border-[#4A5A63]/60 p-2 sm:p-2.5 focus-within:border-[#B8860B] transition-all duration-300 gap-2 sm:gap-0">
-          <div className="flex items-center flex-1 px-3">
-            <svg
-              className="w-5 h-5 text-[#4A5A63] shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <input
-              type="text"
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              placeholder="Enter company name (e.g. Tesla, Stripe)..."
-              disabled={isLoading}
-              className="w-full bg-transparent px-3 py-3 text-[#F6F1E7] placeholder-[#4A5A63] focus:outline-none text-base font-sans min-h-[44px]"
-            />
+      {/* Dossier Card Container - Manila paper folder look */}
+      <div className="bg-[#D9CBA8] border-2 border-[#22201B] p-6 sm:p-10 shadow-[8px_8px_0px_#22201B] relative text-left staple-clip">
+        
+        {/* Top Confidential Stamp */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#22201B] pb-4 mb-6">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 border-2 border-[#8B2E2E] text-[#8B2E2E] font-mono font-bold text-[11px] tracking-widest uppercase rotate-[-1deg]">
+              CLASSIFIED // RESTRICTED ACCESS
+            </span>
+            <span className="text-xs font-mono text-[#6B6353] font-bold hidden sm:inline">
+              REF: IC-REQ-2026
+            </span>
           </div>
-          <button
-            type="submit"
-            disabled={!inputVal.trim() || isLoading}
-            className="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-[#B8860B] hover:bg-[#966d09] active:bg-[#7a5807] disabled:opacity-50 text-[#12181B] font-bold rounded-xl transition-all duration-200 shrink-0 shadow-lg shadow-[#B8860B]/20 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base uppercase tracking-wider"
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-[#12181B]" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Analyzing...</span>
-              </>
-            ) : (
-              'Convene Committee →'
-            )}
-          </button>
+          <span className="text-xs font-mono font-bold text-[#22201B] bg-[#EDE4D3] px-3 py-1 border border-[#22201B]">
+            FORM 10-IC
+          </span>
         </div>
-      </form>
 
-      {/* Example Chips with 44px min tap targets */}
-      <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-        <span className="text-xs font-semibold text-[#4A5A63] uppercase tracking-wider w-full sm:w-auto mb-1 sm:mb-0">
-          Try evaluating:
-        </span>
-        {EXAMPLE_COMPANIES.map((company) => (
-          <button
-            key={company.name}
-            type="button"
-            onClick={() => handleChipClick(company.name)}
-            disabled={isLoading}
-            className="min-h-[44px] px-4 py-2 rounded-xl bg-[#12181B] hover:bg-[#1f292d] active:bg-[#2a373d] border border-[#4A5A63]/50 text-xs font-medium text-[#F6F1E7] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md"
-          >
-            <span className="font-bold text-[#B8860B]">{company.name}</span>
-            <span className="text-[#4A5A63] text-[11px] hidden md:inline">{company.subtitle}</span>
-          </button>
-        ))}
+        {/* Title */}
+        <h1 className="text-3xl sm:text-5xl font-serif font-bold text-[#22201B] tracking-tight mb-3">
+          Investment Committee Dossier System
+        </h1>
+
+        {/* Description / Subtitle */}
+        <p className="text-xs sm:text-sm text-[#22201B]/80 font-sans leading-relaxed mb-8 max-w-2xl">
+          Simulate a Wall Street Investment Committee review. Enter any target corporation to execute live web research, IC memo drafting, parallel Bull vs. Bear debate, due diligence risk audit, and deterministic conviction calculation.
+        </p>
+
+        {/* Input Form Box */}
+        <form onSubmit={handleSubmit} className="mb-8">
+          <div className="bg-[#EDE4D3] border-2 border-[#22201B] p-3 sm:p-4 shadow-[4px_4px_0px_#22201B]">
+            <label className="block text-[11px] font-mono uppercase font-bold text-[#6B6353] mb-2 tracking-wider">
+              TARGET ENTITY IDENTIFIER:
+            </label>
+            
+            <div className="flex flex-col sm:flex-row items-stretch gap-3">
+              <input
+                type="text"
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                placeholder="ENTER ENTITY NAME (E.G. TESLA, STRIPE, ZOMATO)..."
+                disabled={isLoading}
+                className="w-full bg-[#EDE4D3] border-2 border-[#22201B] px-4 py-3 text-[#22201B] placeholder-[#6B6353] focus:outline-none focus:bg-white text-sm font-mono font-bold min-h-[44px]"
+              />
+              
+              <button
+                type="submit"
+                disabled={!inputVal.trim() || isLoading}
+                className="min-h-[44px] px-6 py-3 bg-[#22201B] hover:bg-[#38352e] active:bg-[#151411] disabled:opacity-50 text-[#EDE4D3] font-mono font-bold border-2 border-[#22201B] transition-all shrink-0 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider shadow-[2px_2px_0px_#6B6353]"
+              >
+                {isLoading ? (
+                  <span>INITIATING DOSSIER...</span>
+                ) : (
+                  <span>INITIATE INVESTIGATION →</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* Example Case Chips */}
+        <div>
+          <span className="text-[11px] font-mono font-bold uppercase text-[#6B6353] block mb-2 tracking-wider">
+            PRE-INDEXED CASE DOSSIERS:
+          </span>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            {EXAMPLE_COMPANIES.map((company) => (
+              <button
+                key={company.name}
+                type="button"
+                onClick={() => handleChipClick(company.name)}
+                disabled={isLoading}
+                className="min-h-[44px] px-3.5 py-2 bg-[#EDE4D3] hover:bg-white active:bg-[#EDE4D3] border border-[#22201B] text-xs font-mono text-[#22201B] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2 shadow-[2px_2px_0px_#22201B]"
+              >
+                <span className="font-bold">[{company.name}]</span>
+                <span className="text-[10px] text-[#6B6353] hidden sm:inline">{company.subtitle}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 }
