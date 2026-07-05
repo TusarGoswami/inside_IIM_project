@@ -12,15 +12,7 @@ import {
 } from 'recharts';
 
 /**
- * ScoreBreakdownChart component — horizontal bar chart using strict boardroom 5-color palette:
- * - Ink (#12181B)
- * - Parchment (#F6F1E7)
- * - Brass (#B8860B)
- * - Ledger-Green (#2F6F4E)
- * - Claret (#7A2E2E)
- * - Slate (#4A5A63)
- *
- * Fixed: Single YAxis component to prevent text overlap artifact.
+ * ScoreBreakdownChart component — Horizontal Bar Chart with Dossier Manila & Ink theme.
  *
  * @param {{ scores: import('../../types/research.js').ScoreBreakdown }} props
  */
@@ -31,76 +23,80 @@ export function ScoreBreakdownChart({ scores }) {
     {
       name: 'Market Position (25%)',
       score: scores.marketPosition ?? 0,
-      color: '#B8860B', // brass
+      color: '#A9772E', // stamp amber
     },
     {
       name: 'Financial Health (25%)',
       score: scores.financialHealth ?? 0,
-      color: '#2F6F4E', // ledger-green
+      color: '#3E6B4F', // stamp green
     },
     {
       name: 'Growth Trajectory (20%)',
       score: scores.growthTrajectory ?? 0,
-      color: '#B8860B', // brass
+      color: '#A9772E', // stamp amber
     },
     {
       name: 'Bear-Adjusted (15%)',
       score: scores.bearAdjustedConviction ?? 0,
-      color: '#2F6F4E', // ledger-green
+      color: '#3E6B4F', // stamp green
     },
     {
       name: 'Source Quality (10%)',
       score: scores.sourceQuality ?? 0,
-      color: '#4A5A63', // slate
+      color: '#22201B', // ink
     },
     {
       name: 'Risk Penalty',
       score: scores.riskPenalty ? -Math.abs(scores.riskPenalty) : 0,
-      color: '#7A2E2E', // claret negative bar
+      color: '#8B2E2E', // stamp red
     },
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-[#12181B] border border-[#4A5A63]/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#4A5A63]/40">
+    <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-4 sm:p-6 shadow-[6px_6px_0px_#22201B] mb-8 staple-clip">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b-2 border-[#22201B]">
         <div>
-          <h3 className="text-base font-serif font-bold text-[#F6F1E7] flex items-center gap-2">
-            📊 Committee Score Breakdown
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#6B6353] block font-bold">
+            EXHIBIT D — WEIGHTED SCORE CALCULATION
+          </span>
+          <h3 className="text-base font-serif font-bold text-[#22201B] flex items-center gap-2 mt-0.5">
+            COMMITTEE DIMENSION BREAKDOWN
           </h3>
-          <p className="text-xs text-[#4A5A63] mt-0.5 font-sans">
+          <p className="text-xs text-[#6B6353] font-sans">
             Weighted dimension scores (0-100) & risk penalty subtraction
           </p>
         </div>
-        <div className="flex items-center gap-4 text-xs font-mono text-[#4A5A63]">
+        <div className="flex items-center gap-4 text-xs font-mono text-[#22201B] font-bold">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#B8860B]"></span> Dimension Score
+            <span className="w-3 h-3 bg-[#3E6B4F] border border-[#22201B]"></span> DIMENSION
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#7A2E2E]"></span> Risk Penalty
+            <span className="w-3 h-3 bg-[#8B2E2E] border border-[#22201B]"></span> PENALTY
           </span>
         </div>
       </div>
 
-      <div className="w-full h-72 sm:h-80">
+      <div className="w-full h-72 sm:h-80 bg-[#EDE4D3] border-2 border-[#22201B] p-2">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"
             data={data}
             margin={{ top: 10, right: 25, left: 10, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#4A5A63" opacity={0.3} horizontal={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#6B6353" opacity={0.3} horizontal={false} />
             <XAxis
               type="number"
               domain={[-25, 100]}
-              stroke="#4A5A63"
-              tick={{ fill: '#4A5A63', fontSize: 11 }}
+              stroke="#22201B"
+              tick={{ fill: '#22201B', fontSize: 11, fontFamily: 'IBM Plex Mono' }}
             />
-            {/* Single YAxis to guarantee no label overlapping */}
             <YAxis
               type="category"
               dataKey="name"
-              stroke="#4A5A63"
-              tick={{ fill: '#F6F1E7', fontSize: 11, fontWeight: 500 }}
+              stroke="#22201B"
+              tick={{ fill: '#22201B', fontSize: 11, fontWeight: 600, fontFamily: 'IBM Plex Mono' }}
               width={140}
             />
             <Tooltip
@@ -109,9 +105,9 @@ export function ScoreBreakdownChart({ scores }) {
                   const item = payload[0].payload;
                   const val = item.score;
                   return (
-                    <div className="bg-[#12181B] border border-[#4A5A63] p-2.5 rounded-xl shadow-xl text-xs font-mono text-[#F6F1E7]">
-                      <p className="font-serif font-bold text-[#F6F1E7] mb-1">{item.name}</p>
-                      <p className={val < 0 ? 'text-[#7A2E2E] font-bold' : 'text-[#B8860B] font-bold'}>
+                    <div className="bg-[#EDE4D3] border-2 border-[#22201B] p-2.5 shadow-[3px_3px_0px_#22201B] text-xs font-mono text-[#22201B]">
+                      <p className="font-serif font-bold text-[#22201B] mb-1">{item.name}</p>
+                      <p className={val < 0 ? 'text-[#8B2E2E] font-bold' : 'text-[#3E6B4F] font-bold'}>
                         {val < 0 ? `Penalty: ${val}` : `Score: ${val} / 100`}
                       </p>
                     </div>
@@ -120,10 +116,10 @@ export function ScoreBreakdownChart({ scores }) {
                 return null;
               }}
             />
-            <ReferenceLine x={0} stroke="#4A5A63" strokeWidth={1.5} />
-            <Bar dataKey="score" radius={[0, 6, 6, 0]} barSize={22}>
+            <ReferenceLine x={0} stroke="#22201B" strokeWidth={1.5} />
+            <Bar dataKey="score" radius={[0, 0, 0, 0]} barSize={20}>
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={entry.color} stroke="#22201B" strokeWidth={1} />
               ))}
             </Bar>
           </BarChart>
