@@ -1,11 +1,51 @@
 import React from 'react';
 
 /**
- * VerdictCard component — Rubber Ink Stamp pressed onto Official Cover Memo.
- * Aesthetic:
- * - Rubber stamp badge ("INVEST", "WATCHLIST", "PASS"), rotated -3 deg, double border, stamp colors.
- * - Aged paper background (#D9CBA8 or #EDE4D3) with kraft borders.
- * - Typewriter metrics and conviction score box.
+ * VerdictSealWatermark component — Inline SVG of the Official Committee Seal.
+ * Dynamically recolored based on verdict stamp color.
+ */
+function VerdictSealWatermark({ color }) {
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-56 h-56 sm:w-72 sm:h-72 opacity-12 transform -rotate-6 pointer-events-none select-none"
+    >
+      <defs>
+        <filter id="roughen-verdict-seal">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" seed="7" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" />
+        </filter>
+      </defs>
+
+      {/* Outer stamped rings */}
+      <circle cx="100" cy="100" r="86" fill="none" stroke={color} strokeWidth="5" filter="url(#roughen-verdict-seal)" />
+      <circle cx="100" cy="100" r="72" fill="none" stroke={color} strokeWidth="2.5" filter="url(#roughen-verdict-seal)" />
+
+      {/* Top curved text */}
+      <path id="topArcVerdict" d="M 32 100 A 68 68 0 0 1 168 100" fill="none" />
+      <text fontFamily="'IBM Plex Mono', 'Courier New', monospace" fontSize="13" fontWeight="700" letterSpacing="3" fill={color} filter="url(#roughen-verdict-seal)">
+        <textPath href="#topArcVerdict" startOffset="8%">INVESTMENT COMMITTEE</textPath>
+      </text>
+
+      {/* Bottom curved text */}
+      <path id="bottomArcVerdict" d="M 168 100 A 68 68 0 0 1 32 100" fill="none" />
+      <text fontFamily="'IBM Plex Mono', 'Courier New', monospace" fontSize="13" fontWeight="700" letterSpacing="4" fill={color} filter="url(#roughen-verdict-seal)">
+        <textPath href="#bottomArcVerdict" startOffset="14%">THE DEAL DESK</textPath>
+      </text>
+
+      {/* Center monogram */}
+      <text x="100" y="118" textAnchor="middle" fontFamily="'Lora', Georgia, serif" fontWeight="700" fontSize="58" fill={color} filter="url(#roughen-verdict-seal)">DD</text>
+
+      {/* Divider stars */}
+      <text x="60" y="106" textAnchor="middle" fontSize="14" fill={color} filter="url(#roughen-verdict-seal)">★</text>
+      <text x="140" y="106" textAnchor="middle" fontSize="14" fill={color} filter="url(#roughen-verdict-seal)">★</text>
+    </svg>
+  );
+}
+
+/**
+ * VerdictCard component — Rubber Ink Stamp pressed onto Official Cover Memo with Seal Watermark.
  *
  * @param {{
  *   verdict: "Invest" | "Watchlist" | "Pass",
@@ -24,6 +64,7 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
           borderColor: 'border-[#3E6B4F]',
           badgeClass: 'stamp-invest',
           label: 'INVEST',
+          hexColor: '#3E6B4F',
         };
       case 'Watchlist':
         return {
@@ -31,6 +72,7 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
           borderColor: 'border-[#A9772E]',
           badgeClass: 'stamp-watchlist',
           label: 'WATCHLIST',
+          hexColor: '#A9772E',
         };
       case 'Pass':
       default:
@@ -39,6 +81,7 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
           borderColor: 'border-[#8B2E2E]',
           badgeClass: 'stamp-pass',
           label: 'PASS',
+          hexColor: '#8B2E2E',
         };
     }
   };
@@ -47,10 +90,15 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
   const clampedConviction = Math.max(0, Math.min(100, conviction));
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-5 sm:p-8 shadow-[8px_8px_0px_#22201B] mb-8 relative staple-clip">
+    <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-5 sm:p-8 shadow-[8px_8px_0px_#22201B] mb-8 relative staple-clip overflow-hidden">
       
+      {/* Background Seal Watermark - Large, dynamically colored, subtle opacity */}
+      <div className="absolute right-4 sm:right-24 top-1/2 -translate-y-1/2 z-0 pointer-events-none hidden sm:block">
+        <VerdictSealWatermark color={stampStyle.hexColor} />
+      </div>
+
       {/* Document Control Line */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#22201B] pb-3 mb-6 font-mono text-xs text-[#6B6353]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#22201B] pb-3 mb-6 font-mono text-xs text-[#6B6353] relative z-10">
         <div className="flex items-center gap-2">
           <span className="font-bold text-[#22201B]">DOSSIER VERDICT RECORD</span>
           <span>•</span>
@@ -59,7 +107,7 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
         <span className="font-bold text-[#22201B]">COMMITTEE ACTION CODE: 10-IC-DECISION</span>
       </div>
 
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
         
         {/* Left: Company & Rubber Ink Stamp */}
         <div className="flex-1 text-left w-full">
@@ -78,7 +126,7 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
 
           {/* Thesis Summary Text */}
           {thesisSummary && (
-            <div className="bg-[#EDE4D3] border border-[#22201B] p-4 shadow-[3px_3px_0px_#22201B] mt-2">
+            <div className="bg-[#EDE4D3]/95 backdrop-blur-[1px] border border-[#22201B] p-4 shadow-[3px_3px_0px_#22201B] mt-2">
               <span className="text-[10px] font-mono uppercase text-[#6B6353] block font-bold mb-1">
                 EXECUTIVE THESIS SYNTHESIS:
               </span>
