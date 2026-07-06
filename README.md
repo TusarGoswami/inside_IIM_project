@@ -59,7 +59,7 @@ The verdict label and conviction score are calculated by a pure, un-opinionated 
 - **Backend**: Node.js + Express, ES Modules (`"type": "module"`), LangGraph.js for state machine orchestration.
 - **AI & Tools**: `@langchain/google-genai` (Google Gemini 2.5), `@langchain/tavily` (Tavily Search API), `zod` for schema validation & retries.
 - **Streaming**: Real-time Server-Sent Events (SSE) from Express to React (`EventSource`).
-- **No Database**: In-memory `Map` keyed by `runId`.
+- **Persistence (Optional)**: PostgreSQL via `pg` (node-postgres) for completed run history. In-memory `Map` remains the primary store for active/in-flight SSE runs.
 
 ---
 
@@ -80,7 +80,13 @@ Edit `.env` and enter your API keys:
 GOOGLE_API_KEY=your_google_gemini_api_key
 TAVILY_API_KEY=your_tavily_search_api_key
 PORT=3001
+
+# Optional — Postgres for run history persistence
+# Works with any Postgres host: local, Supabase, Neon, Railway, etc.
+DATABASE_URL=postgresql://user:password@localhost:5432/dealdesk
 ```
+
+> **Note:** `DATABASE_URL` is optional. If omitted, the app works exactly as before — live runs stream via SSE normally, you just won't have persistent history across server restarts.
 
 ### Step 2: Install Dependencies & Run Backend
 ```bash
@@ -88,6 +94,14 @@ cd backend
 npm install --legacy-peer-deps
 npm start
 # Server running on http://localhost:3001
+```
+
+### Step 2.5 (Optional): Run Database Migration
+If you set `DATABASE_URL`, run the migration to create the `runs` table:
+```bash
+cd backend
+npm run db:migrate
+# ✅ Table "runs" is ready.
 ```
 
 ### Step 3: Run Frontend
@@ -118,10 +132,16 @@ Real captured execution runs can be found under `docs/example-runs/`:
 
 ---
 
-## 7. Limitations & Future Improvements
+## 7. Why Postgres for Run History?
 
-- **In-Memory Store**: Runs are stored in a JavaScript `Map`; restarting the backend clears session history.
+In any real investment analysis tool, persisting evaluation results is a natural product requirement: stakeholders revisit past verdicts, compare conviction across companies, and audit decision trails. Adding `DATABASE_URL`-based Postgres persistence is a low-cost, high-signal addition that demonstrates awareness of this realistic product question — while keeping it strictly optional and additive (the in-memory store still powers all live SSE streaming, and the app degrades gracefully without a database).
+
+---
+
+## 8. Limitations & Future Improvements
+
+- **Active Run Store**: In-flight/live runs are still held in an in-memory `Map`; Postgres is only for completed run history.
 - **Future Improvements**:
-  - Add SQLite/PostgreSQL persistence for historical run comparisons.
   - Export IC Memo as downloadable PDF report.
   - Interactive multi-turn Q&A chat on specific memo sections.
+  - Pagination & search for history when the archive grows large.
