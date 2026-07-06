@@ -96,16 +96,18 @@ router.get('/research/:runId/stream', async (req, res) => {
     const finalRun = runStore.getRun(runId);
     runStore.updateRun(runId, {}, 'completed');
 
-    if (!res.writableEnded) {
-      closeSSEStream(res, finalRun.state);
-    }
+    if (finalRun) {
+      if (!res.writableEnded) {
+        closeSSEStream(res, finalRun.state);
+      }
 
-    // Persist completed run to Postgres (fire-and-forget, never blocks SSE)
-    try {
-      const s = finalRun.state;
-      await saveRun(runId, finalRun.companyName, s.verdict || 'Unknown', s.conviction || 0, s);
-    } catch (dbErr) {
-      console.warn('[Research Route] Failed to persist run to history:', dbErr.message);
+      // Persist completed run to Postgres (fire-and-forget, never blocks SSE)
+      try {
+        const s = finalRun.state;
+        await saveRun(runId, finalRun.companyName, s.verdict || 'Unknown', s.conviction || 0, s);
+      } catch (dbErr) {
+        console.warn('[Research Route] Failed to persist run to history:', dbErr.message);
+      }
     }
   } catch (err) {
     console.error(`[SSE Stream Error - runId ${runId}]:`, err);
