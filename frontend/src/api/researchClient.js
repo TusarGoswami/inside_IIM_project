@@ -1,5 +1,15 @@
-// In development, call backend port 3001 or environment override
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
+// Location-aware API base — automatically uses localhost locally and hardcoded Render in production
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_BASE) {
+    return import.meta.env.VITE_API_BASE;
+  }
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return isLocal 
+    ? 'http://localhost:3001/api' 
+    : 'https://deal-desk-backend-k90s.onrender.com/api';
+};
+
+const API_BASE = getApiBase();
 
 /**
  * Starts a new research run for the given company name.
