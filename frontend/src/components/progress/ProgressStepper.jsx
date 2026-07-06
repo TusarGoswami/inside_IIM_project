@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { STAGES } from '../../types/research.js';
 
 const STEP_CONFIG = [
@@ -7,41 +7,161 @@ const STEP_CONFIG = [
     title: 'SECTION 1 — WEB RESEARCH & EXTRACTION',
     shortTitle: 'SEC 1: RESEARCH',
     description: 'Scanning live market sources, financial filings, competitors, and sentiment',
+    statusMessages: [
+      'Connecting to research sources...',
+      'Querying financial databases...',
+      'Scanning news and press releases...',
+      'Extracting market sentiment data...',
+      'Compiling competitor landscape...',
+      'Aggregating source material...',
+    ],
   },
   {
     key: STAGES.WRITING_MEMO,
     title: 'SECTION 2 — IC INVESTMENT MEMO DRAFT',
     shortTitle: 'SEC 2: MEMO',
     description: 'Synthesizing thesis, competitive moat, financial metrics, and data conflicts',
+    statusMessages: [
+      'Structuring investment thesis...',
+      'Analyzing competitive moat strength...',
+      'Evaluating financial health indicators...',
+      'Cross-referencing data conflicts...',
+      'Drafting executive summary...',
+    ],
   },
   {
     key: STAGES.DEBATING,
     title: 'SECTION 3 — PARALLEL BULL VS BEAR DEBATE',
     shortTitle: 'SEC 3: DEBATE',
     description: 'Running advocate nodes with evidence-backed scoring & conditional rebuttal',
+    statusMessages: [
+      'Bull agent building investment case...',
+      'Bear agent building counter-case...',
+      'Marshalling evidence for arguments...',
+      'Scoring argument strength...',
+      'Evaluating rebuttal conditions...',
+      'Synthesizing debate outcome...',
+    ],
   },
   {
     key: STAGES.AUDITING_RISK,
     title: 'SECTION 4 — DUE DILIGENCE RISK AUDIT',
     shortTitle: 'SEC 4: RISK AUDIT',
     description: 'Auditing regulatory, financial distress, governance flags & data confidence caps',
+    statusMessages: [
+      'Scanning for regulatory red flags...',
+      'Evaluating financial distress signals...',
+      'Auditing governance structure...',
+      'Assessing data confidence level...',
+      'Classifying risk severity tiers...',
+    ],
   },
   {
     key: STAGES.VOTING,
     title: 'SECTION 5 — VERDICT & CONVICTION COMPUTATION',
     shortTitle: 'SEC 5: VERDICT',
     description: 'Calculating 5-dimension weighted score, risk penalty, and final verdict',
+    statusMessages: [
+      'Computing market position score...',
+      'Calculating financial health weight...',
+      'Applying bear-adjusted conviction...',
+      'Factoring risk penalty deductions...',
+      'Determining final verdict label...',
+      'Generating thesis synthesis...',
+    ],
   },
 ];
+
+/**
+ * RotatingStatus — Cycles through status messages for the active step.
+ * Styled as typewriter log entries to match the classified dossier aesthetic.
+ *
+ * @param {{ messages: string[] }} props
+ */
+function RotatingStatus({ messages }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    setIndex(0);
+    const interval = setInterval(() => {
+      setIndex(prev => (prev + 1) % messages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [messages]);
+
+  return (
+    <div className="flex items-center gap-2 mt-2 animate-fade-in" key={index}>
+      <span className="inline-block w-1.5 h-1.5 bg-[#A9772E] animate-pulse shrink-0"></span>
+      <span className="text-[11px] font-mono text-[#A9772E] font-semibold typewriter-line">
+        {messages[index]}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * ThinkingIndicator — Animated thinking state shown before any data arrives.
+ * Gives immediate visual feedback that the pipeline has started.
+ */
+function ThinkingIndicator({ companyName }) {
+  const [dotCount, setDotCount] = useState(1);
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  const messages = [
+    `Initiating dossier for ${companyName || 'target entity'}`,
+    'Establishing secure research channels',
+    'Preparing analysis framework',
+    'Connecting to intelligence sources',
+  ];
+
+  useEffect(() => {
+    const dotTimer = setInterval(() => {
+      setDotCount(prev => (prev % 3) + 1);
+    }, 500);
+    const msgTimer = setInterval(() => {
+      setMsgIndex(prev => (prev + 1) % messages.length);
+    }, 4000);
+    return () => { clearInterval(dotTimer); clearInterval(msgTimer); };
+  }, []);
+
+  return (
+    <div className="bg-[#EDE4D3] border-2 border-[#22201B] p-4 sm:p-5 shadow-[4px_4px_0px_#22201B] animate-fade-in">
+      {/* Scanning animation header */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex gap-1">
+          <span className="w-2 h-2 bg-[#3E6B4F] animate-pulse" style={{ animationDelay: '0ms' }}></span>
+          <span className="w-2 h-2 bg-[#A9772E] animate-pulse" style={{ animationDelay: '200ms' }}></span>
+          <span className="w-2 h-2 bg-[#3E6B4F] animate-pulse" style={{ animationDelay: '400ms' }}></span>
+        </div>
+        <span className="text-[11px] font-mono font-bold text-[#22201B] uppercase tracking-wider">
+          COMMITTEE PIPELINE INITIALIZING{'.'.repeat(dotCount)}
+        </span>
+      </div>
+
+      {/* Rotating status line */}
+      <div className="flex items-start gap-2 pl-1">
+        <span className="text-[10px] font-mono text-[#6B6353] font-bold select-none mt-0.5">▸</span>
+        <span className="text-xs font-mono text-[#6B6353] typewriter-line" key={msgIndex}>
+          {messages[msgIndex]}
+        </span>
+      </div>
+
+      {/* Animated progress bar */}
+      <div className="mt-3 h-1 bg-[#D9CBA8] border border-[#22201B]/30 overflow-hidden">
+        <div className="h-full bg-[#3E6B4F]/60 progress-slide"></div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * ProgressStepper component — Stack of Folder Tabs (Dossier File Case Style).
  * Each stage is represented as a physical folder tab that lifts/opens as work progresses.
  * Mobile: Degradation into compact tab strip.
  *
- * @param {{ stage: string, reasoningTrail?: string[], error?: string }} props
+ * @param {{ stage: string, reasoningTrail?: string[], error?: string, companyName?: string }} props
  */
-export function ProgressStepper({ stage, reasoningTrail = [], error }) {
+export function ProgressStepper({ stage, reasoningTrail = [], error, companyName }) {
   const getStepStatus = (stepKey) => {
     const stageOrder = [
       STAGES.IDLE,
@@ -70,6 +190,10 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
     return 'pending';
   };
 
+  // Calculate completed step count for the activity summary
+  const completedSteps = STEP_CONFIG.filter(s => getStepStatus(s.key) === 'completed').length;
+  const activeStep = STEP_CONFIG.find(s => getStepStatus(s.key) === 'active');
+
   return (
     <div className="w-full max-w-[1200px] mx-auto bg-[#D9CBA8] border-2 border-[#22201B] p-4 sm:p-6 shadow-[6px_6px_0px_#22201B] mb-8 staple-clip">
       
@@ -84,10 +208,22 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
             DOSSIER EXECUTION PIPELINE
           </h2>
         </div>
-        <span className="text-[11px] font-mono px-3 py-1 bg-[#EDE4D3] text-[#22201B] border border-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]">
-          STREAM ACTIVE
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-[11px] font-mono px-3 py-1 bg-[#EDE4D3] text-[#22201B] border border-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]">
+            STREAM ACTIVE
+          </span>
+          <span className="text-[10px] font-mono text-[#6B6353] font-bold">
+            {completedSteps}/{STEP_CONFIG.length} SECTIONS COMPLETE
+          </span>
+        </div>
       </div>
+
+      {/* Thinking Indicator — shown immediately before any node completes */}
+      {stage === STAGES.RESEARCHING && reasoningTrail.length === 0 && (
+        <div className="mb-6">
+          <ThinkingIndicator companyName={companyName} />
+        </div>
+      )}
 
       {/* MOBILE (< 640px): Compact Horizontal Folder Tabs Strip */}
       <div className="block sm:hidden mb-6">
@@ -98,7 +234,7 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
             return (
               <div
                 key={step.key}
-                className={`flex items-center gap-2 px-3 py-2 border-2 text-xs font-mono whitespace-nowrap shrink-0 ${
+                className={`flex flex-col px-3 py-2 border-2 text-xs font-mono whitespace-nowrap shrink-0 ${
                   status === 'completed'
                     ? 'bg-[#3E6B4F]/10 border-[#3E6B4F] text-[#3E6B4F] font-bold'
                     : status === 'active'
@@ -108,10 +244,16 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
                     : 'bg-[#D9CBA8] border-[#6B6353]/40 text-[#6B6353]'
                 }`}
               >
-                <span>[{index + 1}]</span>
-                <span>{step.shortTitle}</span>
-                {status === 'completed' && <span>✓</span>}
-                {status === 'active' && <span className="animate-pulse">▶</span>}
+                <div className="flex items-center gap-2">
+                  <span>[{index + 1}]</span>
+                  <span>{step.shortTitle}</span>
+                  {status === 'completed' && <span>✓</span>}
+                  {status === 'active' && <span className="animate-pulse">▶</span>}
+                </div>
+                {/* Rotating sub-status on active mobile tab */}
+                {status === 'active' && (
+                  <RotatingStatus messages={step.statusMessages} />
+                )}
               </div>
             );
           })}
@@ -119,7 +261,7 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
       </div>
 
       {/* DESKTOP / TABLET (>= 640px): Stacked Manila Folder Tabs */}
-      <div className="hidden sm:space-y-3 mb-6">
+      <div className="hidden sm:block space-y-3 mb-6">
         {STEP_CONFIG.map((step, index) => {
           const status = getStepStatus(step.key);
 
@@ -165,11 +307,15 @@ export function ProgressStepper({ stage, reasoningTrail = [], error }) {
                 </div>
               </div>
 
-              {/* Tab Description Body */}
+              {/* Tab Description Body + Rotating Sub-Status */}
               <div className="px-4 py-2.5">
                 <p className="text-xs text-[#22201B]/80 font-sans">
                   {step.description}
                 </p>
+                {/* Rotating sub-status for the active step */}
+                {status === 'active' && (
+                  <RotatingStatus messages={step.statusMessages} />
+                )}
               </div>
             </div>
           );

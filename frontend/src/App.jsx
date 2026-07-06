@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import logoSvg from './assets/logo.svg';
 import { useResearchSession } from './hooks/useResearchSession.js';
+import { fetchHistoryRun } from './api/researchClient.js';
 import { STAGES } from './types/research.js';
 import { CompanyInput } from './components/input/CompanyInput.jsx';
 import { ProgressStepper } from './components/progress/ProgressStepper.jsx';
@@ -9,17 +10,46 @@ import { ScoreBreakdownChart } from './components/verdict/ScoreBreakdownChart.js
 import { DebatePanel } from './components/debate/DebatePanel.jsx';
 import { RiskFlags } from './components/risk/RiskFlags.jsx';
 import { MemoPanel } from './components/memo/MemoPanel.jsx';
+import { HistoryPanel } from './components/history/HistoryPanel.jsx';
+import { ResearchPanel } from './components/research/ResearchPanel.jsx';
 
 export default function App() {
   const { stage, partialState, finalState, error, startSession, resetSession } = useResearchSession();
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [showTechDetails, setShowTechDetails] = useState(false);
 
-  const state = finalState || partialState || {};
-  const isRunning = stage !== STAGES.IDLE && stage !== STAGES.COMPLETED && stage !== STAGES.ERROR;
-  const isCompleted = stage === STAGES.COMPLETED && Boolean(finalState || state.verdict);
+  // History view state
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyState, setHistoryState] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const state = historyState || finalState || partialState || {};
+  const isRunning = !historyState && stage !== STAGES.IDLE && stage !== STAGES.COMPLETED && stage !== STAGES.ERROR;
+  const isCompleted = historyState || (stage === STAGES.COMPLETED && Boolean(finalState || state.verdict));
 
   const isRateLimitError = error?.includes('rate limit') || error?.includes('429') || error?.includes('Quota');
+
+  /** Load a past run from history into the result view */
+  const handleLoadHistoryRun = async (id) => {
+    setHistoryLoading(true);
+    try {
+      const result = await fetchHistoryRun(id);
+      setHistoryState(result);
+      setShowHistory(false);
+    } catch (err) {
+      console.error('Failed to load history run:', err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  /** Return to input screen, clearing any loaded history */
+  const handleBackToInput = () => {
+    setShowHistory(false);
+    setHistoryState(null);
+    setSourcesOpen(false);
+    resetSession();
+  };
 
   return (
     <div className="min-h-screen bg-[#EDE4D3] text-[#22201B] font-sans selection:bg-[#D9CBA8] selection:text-[#22201B] border-t-4 border-[#22201B]">
@@ -28,7 +58,7 @@ export default function App() {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
           
           {/* Brand / Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={resetSession}>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={handleBackToInput}>
             <img
               src={logoSvg}
               alt="The Deal Desk Stamp Logo"
@@ -58,21 +88,59 @@ export default function App() {
       {/* Main Dossier Container */}
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
         
+        {/* History Loading Overlay */}
+        {historyLoading && (
+          <div className="w-full max-w-xl mx-auto text-center py-16 animate-fade-in">
+            <span className="text-sm font-mono text-[#6B6353] animate-pulse">LOADING ARCHIVED DOSSIER...</span>
+          </div>
+        )}
+
+        {/* VIEW: History List */}
+        {showHistory && !historyLoading && (
+          <HistoryPanel
+            onLoadRun={handleLoadHistoryRun}
+            onBack={() => setShowHistory(false)}
+          />
+        )}
+
         {/* VIEW 1: Input View */}
-        {stage === STAGES.IDLE && (
-          <CompanyInput onSubmit={startSession} isLoading={false} />
+        {!showHistory && !historyLoading && stage === STAGES.IDLE && !historyState && (
+          <>
+            <CompanyInput onSubmit={startSession} isLoading={false} />
+            {/* History Link */}
+            <div className="text-center mt-4">
+              <button
+                onClick={() => setShowHistory(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D9CBA8] hover:bg-[#c9bb98] border-2 border-[#22201B] text-[#22201B] font-mono text-xs font-bold uppercase tracking-wider shadow-[3px_3px_0px_#22201B] hover:shadow-[4px_4px_0px_#22201B] transition-all cursor-pointer"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                VIEW PAST DOSSIERS
+              </button>
+            </div>
+          </>
         )}
 
         {/* VIEW 2: Live Progress Session View */}
-        {isRunning && (
+        {!showHistory && !historyLoading && isRunning && (
           <div className="space-y-6">
             <ProgressStepper
               stage={stage}
               reasoningTrail={state.reasoningTrail || []}
               error={error}
+              companyName={state.companyName}
             />
-            {/* Render partial panels as backend streams data */}
-            {state.memo && <MemoPanel memo={state.memo} companyName={state.companyName} />}
+
+            {/* Render partial panels immediately as backend streams each stage */}
+            {state.research && (
+              <ResearchPanel research={state.research} companyName={state.companyName} />
+            )}
+
+            {state.memo && (
+              <MemoPanel memo={state.memo} companyName={state.companyName} />
+            )}
+
             {(state.bullCase || state.bearCase) && (
               <DebatePanel
                 bullCase={state.bullCase}
@@ -81,11 +149,15 @@ export default function App() {
                 rebuttal={state.rebuttal}
               />
             )}
+
+            {state.riskFlags && state.riskFlags.length > 0 && (
+              <RiskFlags riskFlags={state.riskFlags} />
+            )}
           </div>
         )}
 
         {/* Error State - Red Stamped Rejection Box */}
-        {stage === STAGES.ERROR && (
+        {!showHistory && !historyLoading && stage === STAGES.ERROR && !historyState && (
           <div className="w-full max-w-xl mx-auto bg-[#EDE4D3] border-2 border-[#8B2E2E] p-5 sm:p-8 text-center shadow-[4px_4px_0px_#8B2E2E] animate-fade-in my-6">
             <div className="inline-block px-4 py-1 border-2 border-[#8B2E2E] text-[#8B2E2E] font-mono font-bold text-xs uppercase tracking-widest mb-4">
               [SYSTEM ERROR / EXECUTION ABORTED]
@@ -118,7 +190,7 @@ export default function App() {
             </div>
 
             <button
-              onClick={resetSession}
+              onClick={handleBackToInput}
               className="min-h-[44px] px-8 py-3 bg-[#8B2E2E] hover:bg-[#a33737] active:bg-[#722525] text-[#EDE4D3] font-mono font-bold uppercase tracking-wider text-xs sm:text-sm border-2 border-[#22201B] shadow-[3px_3px_0px_#22201B] transition-all cursor-pointer"
             >
               RE-INITIATE DOSSIER →
@@ -126,9 +198,18 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 3: Final IC Result View */}
-        {isCompleted && (
+        {/* VIEW 3: Final IC Result View (also used for loaded history) */}
+        {!showHistory && !historyLoading && isCompleted && (
           <div className="space-y-8 animate-fade-in">
+
+            {/* Archived Record Banner (only for history-loaded results) */}
+            {historyState && (
+              <div className="bg-[#EDE4D3] border-2 border-[#6B6353] p-3 text-center shadow-[3px_3px_0px_#6B6353]">
+                <span className="text-[11px] font-mono font-bold text-[#6B6353] uppercase tracking-widest">
+                  📂 ARCHIVED RECORD — LOADED FROM HISTORY
+                </span>
+              </div>
+            )}
             
             {/* Top Verdict Card */}
             <VerdictCard
@@ -136,7 +217,7 @@ export default function App() {
               conviction={state.conviction}
               thesisSummary={state.thesisSummary}
               companyName={state.companyName}
-              onReset={resetSession}
+              onReset={handleBackToInput}
             />
 
             {/* Score Breakdown Chart */}
@@ -200,7 +281,7 @@ export default function App() {
             {/* Bottom Reset Button */}
             <div className="text-center py-6">
               <button
-                onClick={resetSession}
+                onClick={handleBackToInput}
                 className="min-h-[44px] px-8 py-3.5 bg-[#22201B] hover:bg-[#38352e] active:bg-[#151411] text-[#EDE4D3] font-mono font-bold uppercase tracking-wider shadow-[4px_4px_0px_#6B6353] transition-all cursor-pointer text-sm border-2 border-[#22201B]"
               >
                 EVALUATE ANOTHER DOSSIER →
@@ -214,3 +295,4 @@ export default function App() {
     </div>
   );
 }
+
