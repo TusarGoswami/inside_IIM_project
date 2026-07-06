@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import env from './config/env.js';
 import researchRouter from './routes/research.route.js';
+import historyRouter from './routes/history.route.js';
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api', researchRouter);
+app.use('/api', historyRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { runStore } from '../utils/runStore.js';
 import { buildGraph } from '../graph/graph.js';
 import { initSSEResponse, sendSSEEvent, closeSSEStream, errorSSEStream } from '../utils/sseEmitter.js';
+import { saveRun } from '../services/history.service.js';
 
 const router = Router();
 // Singleton instance of compiled LangGraph
@@ -97,6 +98,14 @@ router.get('/research/:runId/stream', async (req, res) => {
 
     if (!res.writableEnded) {
       closeSSEStream(res, finalRun.state);
+    }
+
+    // Persist completed run to Postgres (fire-and-forget, never blocks SSE)
+    try {
+      const s = finalRun.state;
+      await saveRun(runId, finalRun.companyName, s.verdict || 'Unknown', s.conviction || 0, s);
+    } catch (dbErr) {
+      console.warn('[Research Route] Failed to persist run to history:', dbErr.message);
     }
   } catch (err) {
     console.error(`[SSE Stream Error - runId ${runId}]:`, err);
