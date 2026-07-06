@@ -1,66 +1,16 @@
 # The Deal Desk — AI Investment Committee Simulator
 
-*Note on this README: This project was built using AI-assisted pair programming throughout. Rather than using generic templates, this documentation details the real engineering decisions, trade-offs, and pivots encountered during the build.*
+> An AI-powered multi-agent investment research workflow that simulates a Wall Street Investment Committee (IC) review. Given a company name, the system autonomously performs live web research, drafts a structured thesis memo, runs parallel Bull vs. Bear advocate agents with a conditional rebuttal round, conducts a due diligence risk audit, and deterministically computes a weighted conviction verdict (**Invest / Watchlist / Pass**).
+
+## 🚀 Live Deployments
+- **Frontend (Vercel):** [https://inside-iim-project-smoky.vercel.app/](https://inside-iim-project-smoky.vercel.app/)
+- **Backend API (Render):** [https://deal-desk-backend-k90s.onrender.com/](https://deal-desk-backend-k90s.onrender.com/)
 
 ---
 
-## Overview
+## 1. Overview & Architecture
 
-I built **The Deal Desk** to solve a common problem with LLMs in business workflows: unpredictability. When you ask a generic chatbot "Should we invest in Tesla?", you get a hallucination-prone, unstructured narrative. 
-
-Instead of letting an LLM make the final call, The Deal Desk runs a structured, multi-agent committee process. The AI agents are restricted to extraction, advocacy (Bull vs. Bear), and risk scanning, while the final conviction score and verdict (**Invest / Watchlist / Pass**) are calculated deterministically in pure JavaScript code based on their outputs.
-
----
-
-## How to run it
-
-### Prerequisites
-- Node.js (v18+)
-- Google Gemini API Key (`GOOGLE_API_KEY`)
-- Tavily Search API Key (`TAVILY_API_KEY`)
-
-### Step 1: Configure Environment
-Copy `.env.example` to `.env` at the root of the project:
-```bash
-cp .env.example .env
-```
-Fill in your API keys:
-```env
-GOOGLE_API_KEY=your_gemini_key
-TAVILY_API_KEY=your_tavily_key
-PORT=3001
-
-# Optional: Neon or local Postgres connection URL for run history
-DATABASE_URL=postgresql://neondb_owner:...
-```
-*Note: `DATABASE_URL` is optional. If left blank, the app will degrade gracefully, storing runs in memory for the active session without persistent history.*
-
-### Step 2: Set Up Database (Optional)
-If you provided a `DATABASE_URL`, run the schema migration to create the table:
-```bash
-cd backend
-npm run db:migrate
-```
-
-### Step 3: Run the Application
-You can start both the frontend and backend concurrently with a single command from the project root:
-```bash
-npm start
-```
-- **Frontend** will be running at [http://localhost:5173](http://localhost:5173)
-- **Backend API** will be running at [http://localhost:3001](http://localhost:3001)
-
-To run the multi-agent graph logic locally via command line to verify node execution traces, deterministic scoring logic, and retry behavior, run the test script:
-```bash
-cd backend
-npm test
-```
-
----
-
-## How it works
-
-The system is organized as a state machine using LangGraph.js:
+"The Deal Desk" reframes standard LLM chat into a structured, multi-agent committee process. The workflow guarantees that **verdicts and scores are never directly hallucinated by LLMs**, but are deterministically computed in pure code from evidence-backed agent outputs.
 
 ```mermaid
 graph TD
@@ -70,70 +20,132 @@ graph TD
     M --> B2[bearNode<br/>Parallel Advocate]
     B1 --> DJ{debateJudgeCheck<br/>Gap <= 15?}
     B2 --> DJ
-    DJ -- "Yes: Gap <= 15" --> REB[rebuttalNode<br/>Counter-Arguments]
-    DJ -- "No: Gap > 15" --> RA[riskAuditorNode<br/>Red Flag Scan]
+    DJ -- Yes: Gap <= 15 --=> REB[rebuttalNode<br/>Counter-Arguments]
+    DJ -- No: Gap > 15 --=> RA[riskAuditorNode<br/>Red Flag Scan]
     REB --> RA
     RA --> SA[scoreAggregatorNode<br/>Deterministic Verdict Code]
     SA --> VJ[verdictJudgeNode<br/>Narrative Thesis Synthesis]
     VJ --> END([END])
 ```
 
-### The Deterministic Decision Engine
-Once the agents extract and advocate, they output structured parameters (using Zod schemas). The `scoreAggregatorNode` compiles these using a pure JS function:
+---
 
-1. **Market Position & Moat (25%)**: Evaluates competitive advantages and market share.
-2. **Financial Health (25%)**: Scores margins, debt, revenue, and cash balances.
-3. **Growth Trajectory (20%)**: Evaluates revenue growth rate and market expansion potential.
-4. **Bear-Adjusted Conviction (15%)**: Computed by comparing the strength difference between the Bull and Bear advocates:
+## 2. Deterministic Decision Framework
+
+The verdict label and conviction score are calculated by a pure, un-opinionated function (`computeVerdict` in `backend/src/graph/nodes/scoreAggregator.node.js`):
+
+### Dimension Weights (Sum to 100)
+1. **Market Position & Moat (25%)**: Competitive moat, market share, brand power.
+2. **Financial Health (25%)**: Revenue, net income, margins, debt/equity ratio.
+3. **Growth Trajectory (20%)**: Revenue growth rate, expansion potential, TAM.
+4. **Bear-Adjusted Conviction (15%)**: Normalized score from bull/bear strength difference:
    $$\text{BearAdjusted} = \text{round}\left(\frac{(\text{BullStrength} - \text{BearStrength}) + 100}{2} \right)$$
-5. **Source Quality (10%)**: Scaled based on the quantity of unique primary web sources retrieved (0-2 sources $\rightarrow$ $\le$40 points, 3-4 sources $\rightarrow$ $\le$70 points, 5+ sources $\rightarrow$ up to 100 points).
+5. **Source Quality (10%)**: Scaled by usable source count (0–2 sources → ≤40, 3–4 → ≤70, 5+ → up to 100).
 
-### Penalties, Caps, and Overrides
-- **Risk Penalty**: High-severity risk flags reduce the final score (Medium: -8 points, High: -15 points).
-- **Low-Data Confidence Cap**: If `lowDataConfidence === true` (less than 2 primary sources found), the conviction is strictly capped at **60**, preventing a high-conviction verdict on scarce evidence.
-- **Critical Flag Override**: If the Risk Auditor detects a `critical` severity flag (e.g., active fraud or imminent bankruptcy), the verdict is immediately forced to **Pass** regardless of the calculated conviction score.
+### Risk Penalty & Caps
+- **Risk Penalty**:
+  - Highest severity **Medium**: $-8$ points
+  - Highest severity **High**: $-15$ points
+  - Highest severity **Critical**: Triggers unconditional override
+- **Low-Data Confidence Cap**: If `lowDataConfidence === true` (< 2 substantive sources found), conviction is strictly capped at **60**, regardless of raw score.
+- **Critical Flag Override**: If any risk flag has `severity === "critical"` (e.g. active fraud, imminent bankruptcy), the verdict is forced to **Pass** unconditionally, regardless of conviction score.
 
-### Verdict Thresholds (Assuming no Critical Override)
+### Verdict Thresholds (No Critical Override)
 - **Conviction $\ge$ 65** $\rightarrow$ **Invest**
 - **45 $\le$ Conviction < 65** $\rightarrow$ **Watchlist**
-- **Conviction < 45** $\rightarrow$ **Watchlist** (if a high-severity flag exists but conviction is $\ge$ 40) else **Pass**
+- **Conviction < 45** $\rightarrow$ **Watchlist** (if high-severity flag + conviction $\ge$ 40) else **Pass**
 
 ---
 
-## Key decisions & trade-offs
+## 3. Tech Stack
 
-### 1. Handling Gemini Free-Tier Rate Limits
-During development, running the Bull and Bear advocate agents in parallel frequently triggered `429 Resource Exhausted` rate-limit errors on the free-tier Gemini API. While using Pro models would exceed free quotas instantly and relying solely on a single model tier risked fragile workflows, I structured a fallback chain helper in [llm.service.js](backend/src/services/llm.service.js). Execution starts with `gemini-2.5-flash` for fast, structured extraction, but if a quota limit is met, the system seamlessly downgrades to `gemini-2.0-flash`, then to `gemini-1.5-flash`, paired with an exponential backoff retry delay ($2^n$ seconds).
-
-### 2. Redesigning to the "Classified Case File" Theme
-The initial design iteration was a generic, dark-themed AI landing page. I realized it lacked personality and looked identical to boilerplate templates. Instead of sticking with this conventional style, I completely pivoted the layout to a retro "Classified Investment Dossier" aesthetic. By utilizing warm manila folder tones, monospaced typewriter fonts, solid borders, rubber-stamp decals, and folder-tab progress bars, the user experience matches the multi-agent committee metaphor.
-
-### 3. Additive Postgres History Layer
-My original design relied entirely on an in-memory run store since the active real-time SSE streams did not require database operations. However, I noticed the job description highlighted database experience as a bonus. Rather than complicating the live streaming layer or making a database mandatory to run the basic application, I added an optional Postgres history layer. Completed runs write one record to the database, and the connection is safely wrapped in a try/catch: if `DATABASE_URL` is missing, the app logs a warning and degrades gracefully.
-
-### 4. Resolving the "Blank Screen" SSE Connection Delay
-Upon establishing the Server-Sent Events (SSE) stream, the page originally stayed empty for 30+ seconds while the first research node ran. I wanted to eliminate this blank state to keep the experience responsive. I updated [ProgressStepper.jsx](frontend/src/components/progress/ProgressStepper.jsx) to immediately trigger a dynamic "dossier initialization" log when the stream connects, and refactored the UI to render partial components (like verified source lists or the draft memo) in real-time as each graph node completes.
+- **Frontend**: React (Vite), Plain JavaScript (JSX, no TypeScript), Tailwind CSS v4 (`@tailwindcss/vite`), `recharts` for score breakdown charts.
+- **Backend**: Node.js + Express, ES Modules (`"type": "module"`), LangGraph.js for state machine orchestration.
+- **AI & Tools**: `@langchain/google-genai` (Google Gemini 2.5), `@langchain/tavily` (Tavily Search API), `zod` for schema validation & retries.
+- **Streaming**: Real-time Server-Sent Events (SSE) from Express to React (`EventSource`).
+- **Persistence (Optional)**: PostgreSQL via `pg` (node-postgres) for completed run history. In-memory `Map` remains the primary store for active/in-flight SSE runs.
 
 ---
 
-## Example runs
+## 4. How to Run Locally
 
-Real execution results are committed in the repository under the `docs/example-runs/` folder:
-- [tesla_run.json](docs/example-runs/tesla_run.json) — **Pass Verdict (Conviction: 35/100)**: Underwent a full rebuttal round. Evaluated compressing gross margins (5.7% operating margins in Q4 2025) and regulatory headwinds, resulting in a Pass verdict due to high-severity flags.
-- [paytm_run.json](docs/example-runs/paytm_run.json) — **Watchlist Verdict (Conviction: 58/100)**: Captures the recovery trajectory of the digital payments platform.
+### Prerequisites
+- Node.js (v18+)
+- Google Gemini API Key (`GOOGLE_API_KEY`)
+- Tavily Search API Key (`TAVILY_API_KEY`)
+
+### Step 1: Clone & Configure Environment
+```bash
+# Copy example env file to .env at project root
+cp .env.example .env
+```
+Edit `.env` and enter your API keys:
+```env
+GOOGLE_API_KEY=your_google_gemini_api_key
+TAVILY_API_KEY=your_tavily_search_api_key
+PORT=3001
+
+# Optional — Postgres for run history persistence
+# Works with any Postgres host: local, Supabase, Neon, Railway, etc.
+DATABASE_URL=postgresql://user:password@localhost:5432/dealdesk
+```
+
+> **Note:** `DATABASE_URL` is optional. If omitted, the app works exactly as before — live runs stream via SSE normally, you just won't have persistent history across server restarts.
+
+### Step 2: Install Dependencies & Run Backend
+```bash
+cd backend
+npm install --legacy-peer-deps
+npm start
+# Server running on http://localhost:3001
+```
+
+### Step 2.5 (Optional): Run Database Migration
+If you set `DATABASE_URL`, run the migration to create the `runs` table:
+```bash
+cd backend
+npm run db:migrate
+# ✅ Table "runs" is ready.
+```
+
+### Step 3: Run Frontend
+In a separate terminal:
+```bash
+cd frontend
+npm install
+npm run dev
+# App running on http://localhost:5173
+```
 
 ---
 
-## What you would improve with more time
+## 5. Key Technical Decisions & Trade-Offs
 
-If I had more time, I would focus on three specific architectural improvements rather than padding the project with minor features:
-
-1. **Portfolio Comparison Mode**: Currently, you load and view one target company at a time. I would expand the Postgres schema and UI to allow a grid view to compare multiple dossiers side-by-side, sorting them by conviction score and risk exposure.
-2. **Cross-Source Fact Verification**: When the Tavily search extracts conflicting numbers (e.g., one blog post claims $15B revenue while a formal SEC source states $10B), the memo writer flags a generic `dataConflict: true` but doesn't resolve it. I would add a dedicated consensus node that cross-references source URLs against authority rankings to auto-resolve numerical discrepancies.
-3. **Token-Level text streaming**: Right now, the UI receives updates at the node level (the entire memo or case arguments arrive at once). I would update the SSE emitter and LangGraph setup to support token-level streaming so the typewriter logs and memo text appear characters at a time as the LLM generates them.
+1. **Deterministic Scoring vs. LLM Verdicts**: Rather than asking an LLM "Should we invest?", LLMs are restricted to extraction, advocacy, and risk scanning. The verdict formula is pure JavaScript. This eliminates LLM unpredictability in investment decisions.
+2. **Plain JavaScript + JSDoc Typedefs + Zod**: To keep the build clean without a TypeScript compilation step, JSDoc comment blocks (`/** @typedef {...} */`) provide full IDE autocomplete, while Zod schemas provide runtime validation with up to 2 retries on LLM parsing failures.
+3. **Model Tiering**: Gemini 2.5 Flash is used for high-volume extraction (research, risk audit, dimension scoring) to optimize latency (~3s per node) and avoid rate limits on standard API tiers.
+4. **SSE over WebSockets**: Server-Sent Events offer lighter overhead and native browser reconnect logic for unidirectional streaming from Express to React.
 
 ---
 
-## BONUS: LLM chat session transcript
+## 6. Example Captured Runs
 
-Chat transcripts included separately in [docs/chat-logs/](docs/chat-logs/).
+Real captured execution runs can be found under `docs/example-runs/`:
+- [`docs/example-runs/tesla_run.json`](file:///c:/Users/tusar/OneDrive/Desktop/Deal_Desk/docs/example-runs/tesla_run.json) — **Pass Verdict (Conviction: 35/100)**: Highlighted 5 risk flags (profit decline of 46%, intense EV competition, unproven AI pivot) with a -15 penalty.
+- [`docs/example-runs/paytm_run.json`](file:///c:/Users/tusar/OneDrive/Desktop/Deal_Desk/docs/example-runs/paytm_run.json) — **Watchlist Verdict**: Captures regulatory compliance history and recovery trajectory.
+
+---
+
+## 7. Why Postgres for Run History?
+
+In any real investment analysis tool, persisting evaluation results is a natural product requirement: stakeholders revisit past verdicts, compare conviction across companies, and audit decision trails. Adding `DATABASE_URL`-based Postgres persistence is a low-cost, high-signal addition that demonstrates awareness of this realistic product question — while keeping it strictly optional and additive (the in-memory store still powers all live SSE streaming, and the app degrades gracefully without a database).
+
+---
+
+## 8. Limitations & Future Improvements
+
+- **Active Run Store**: In-flight/live runs are still held in an in-memory `Map`; Postgres is only for completed run history.
+- **Future Improvements**:
+  - Export IC Memo as downloadable PDF report.
+  - Interactive multi-turn Q&A chat on specific memo sections.
+  - Pagination & search for history when the archive grows large.
