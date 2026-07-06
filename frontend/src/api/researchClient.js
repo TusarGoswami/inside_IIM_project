@@ -42,3 +42,28 @@ export async function fetchRunState(runId) {
   }
   return response.json();
 }
+
+/**
+ * Fetches the list of past completed runs (lightweight: no full JSON).
+ * @returns {Promise<Array<{ id: string, company_name: string, verdict: string, conviction: number, created_at: string }>>}
+ */
+export async function fetchHistory() {
+  const response = await fetch(`${API_BASE}/history`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch history: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetches the full stored result_json for a single past run.
+ * @param {string} id - Run UUID
+ * @returns {Promise<object>}
+ */
+export async function fetchHistoryRun(id) {
+  const response = await fetch(`${API_BASE}/history/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch history run: HTTP ${response.status}`);
+  }
+  return response.json();
+}
