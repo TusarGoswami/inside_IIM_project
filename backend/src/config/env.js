@@ -8,11 +8,12 @@ const __dirname = dirname(__filename);
 // Load .env from the project root (two levels up from config/)
 dotenv.config({ path: resolve(__dirname, '../../../.env') });
 
-/** @type {{ GOOGLE_API_KEY: string, TAVILY_API_KEY: string, PORT: number }} */
+/** @type {{ GOOGLE_API_KEY: string, TAVILY_API_KEY: string, PORT: number, DATABASE_URL: string }} */
 const env = {
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || '',
   TAVILY_API_KEY: process.env.TAVILY_API_KEY || '',
   PORT: parseInt(process.env.PORT || '3001', 10),
+  DATABASE_URL: process.env.DATABASE_URL || '',
 };
 
 /**
