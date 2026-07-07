@@ -14,6 +14,35 @@ I built this project to simulate the multi-agent review process of a Wall Street
 
 ## 2. How It Works
 
+### Execution Workflow
+
+```mermaid
+flowchart TD
+    User([User Inputs Company Name]) --> POST[POST /api/research]
+    POST --> SSE[GET /api/research/:runId/stream]
+    
+    subgraph LangGraph Agentic Pipeline
+        SSE --> ResearcherNode[1. Researcher Node]
+        ResearcherNode -->|Tavily Finance Search & Extraction| MemoWriterNode[2. Memo Writer Node]
+        MemoWriterNode -->|Parallel Fan-out| BullNode[3a. Bull Analyst Node]
+        MemoWriterNode -->|Parallel Fan-out| BearNode[3b. Bear Analyst Node]
+        
+        BullNode --> DebateJudge[4. Debate Judge Check]
+        BearNode --> DebateJudge
+        
+        DebateJudge -->|Score Gap <= 15| RebuttalNode[Rebuttal Node]
+        DebateJudge -->|Score Gap > 15| RiskAuditorNode[5. Risk Auditor Node]
+        RebuttalNode --> RiskAuditorNode
+        
+        RiskAuditorNode --> ScoreAggregator[6. Score Aggregator Node]
+        ScoreAggregator --> VerdictJudgeNode[7. Verdict Judge Node]
+    end
+    
+    VerdictJudgeNode --> DB[(PostgreSQL DB)]
+    VerdictJudgeNode --> SSE_End([SSE Connection Closes])
+    SSE_End --> UI[Render Verdict Card, Charts & Memo]
+```
+
 When you submit a company name, the pipeline runs through the following stages:
 
 1. **Web Research**: The system queries search engines for recent news, financial updates, competitor landscapes, and sentiment articles.
