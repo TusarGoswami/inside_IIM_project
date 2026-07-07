@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
@@ -17,38 +17,53 @@ import {
  * @param {{ scores: import('../../types/research.js').ScoreBreakdown }} props
  */
 export function ScoreBreakdownChart({ scores }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   if (!scores) return null;
 
   const data = [
     {
       name: 'Market Position (25%)',
+      shortName: 'Market (25%)',
       score: scores.marketPosition ?? 0,
-      color: '#A9772E', // stamp amber
+      color: '#A9772E',
     },
     {
       name: 'Financial Health (25%)',
+      shortName: 'Financial (25%)',
       score: scores.financialHealth ?? 0,
-      color: '#3E6B4F', // stamp green
+      color: '#3E6B4F',
     },
     {
       name: 'Growth Trajectory (20%)',
+      shortName: 'Growth (20%)',
       score: scores.growthTrajectory ?? 0,
-      color: '#A9772E', // stamp amber
+      color: '#A9772E',
     },
     {
       name: 'Bear-Adjusted (15%)',
+      shortName: 'Bear Adj. (15%)',
       score: scores.bearAdjustedConviction ?? 0,
-      color: '#3E6B4F', // stamp green
+      color: '#3E6B4F',
     },
     {
       name: 'Source Quality (10%)',
+      shortName: 'Source (10%)',
       score: scores.sourceQuality ?? 0,
-      color: '#22201B', // ink
+      color: '#22201B',
     },
     {
       name: 'Risk Penalty',
+      shortName: 'Risk Penalty',
       score: scores.riskPenalty ? -Math.abs(scores.riskPenalty) : 0,
-      color: '#8B2E2E', // stamp red
+      color: '#8B2E2E',
     },
   ];
 
@@ -94,10 +109,10 @@ export function ScoreBreakdownChart({ scores }) {
             />
             <YAxis
               type="category"
-              dataKey="name"
+              dataKey={isMobile ? 'shortName' : 'name'}
               stroke="#22201B"
-              tick={{ fill: '#22201B', fontSize: 11, fontWeight: 600, fontFamily: 'IBM Plex Mono' }}
-              width={140}
+              tick={{ fill: '#22201B', fontSize: isMobile ? 10 : 11, fontWeight: 600, fontFamily: 'IBM Plex Mono' }}
+              width={isMobile ? 100 : 140}
             />
             <Tooltip
               content={({ active, payload }) => {
