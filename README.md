@@ -1,7 +1,7 @@
 # The Deal Desk — AI Investment Committee Simulator
 
 ## 🚀 Live Deployments
-- **Frontend (Vercel):** [https://inside-iim-project-smoky.vercel.app/](https://inside-iim-project-smoky.vercel.app/)
+- **Frontend (Vercel):** [https://thedealdesk.vercel.app/](https://thedealdesk.vercel.app/)
 - **Backend API (Render):** [https://deal-desk-backend-k90s.onrender.com/](https://deal-desk-backend-k90s.onrender.com/)
 
 ---
