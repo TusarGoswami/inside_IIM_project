@@ -39,16 +39,10 @@ export function CompanyInput({ onSubmit, isLoading }) {
         {/* Top Confidential Stamp */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#22201B] pb-4 mb-6">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 border-2 border-[#8B2E2E] text-[#8B2E2E] font-mono font-bold text-[11px] tracking-widest uppercase rotate-[-1deg]">
-              CLASSIFIED // RESTRICTED ACCESS
-            </span>
-            <span className="text-xs font-mono text-[#6B6353] font-bold hidden sm:inline">
+            <span className="text-xs font-mono text-[#6B6353] font-bold">
               REF: IC-REQ-2026
             </span>
           </div>
-          <span className="text-xs font-mono font-bold text-[#22201B] bg-[#EDE4D3] px-3 py-1 border border-[#22201B]">
-            FORM 10-IC
-          </span>
         </div>
 
         {/* Title */}
