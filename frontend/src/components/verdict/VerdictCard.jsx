@@ -116,8 +116,8 @@ export function VerdictCard({ verdict, conviction = 0, thesisSummary, companyNam
               OFFICIAL DECISION STAMP:
             </span>
             
-            {/* Rubber Ink Stamp - Rotated, Distressed double border */}
-            <div className="inline-block my-1 transform -rotate-2 hover:rotate-0 transition-transform duration-200">
+            {/* Rubber Ink Stamp - Animated slam reveal */}
+            <div className="inline-block my-1 stamp-slam hover:rotate-0 transition-transform duration-200">
               <div className={`px-6 py-2.5 border-4 border-double font-mono font-black text-3xl sm:text-5xl uppercase tracking-widest bg-[#EDE4D3] shadow-[3px_3px_0px_#22201B] ${stampStyle.badgeClass}`}>
                 {stampStyle.label}
               </div>
