@@ -36,15 +36,6 @@ export function CompanyInput({ onSubmit, isLoading }) {
       {/* Dossier Card Container - Manila paper folder look */}
       <div className="bg-[#D9CBA8] border-2 border-[#22201B] p-6 sm:p-10 shadow-[8px_8px_0px_#22201B] relative text-left staple-clip">
         
-        {/* Top Confidential Stamp */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#22201B] pb-4 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-[#6B6353] font-bold">
-              REF: IC-REQ-2026
-            </span>
-          </div>
-        </div>
-
         {/* Title */}
         <h1 className="text-3xl sm:text-5xl font-serif font-bold text-[#22201B] tracking-tight mb-3">
           Should You Invest? Let's Find Out.
