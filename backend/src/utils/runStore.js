@@ -62,3 +62,17 @@ class RunStore {
 }
 
 export const runStore = new RunStore();
+
+// Sweep every 5 minutes — remove completed/failed runs older than 1 hour
+const RUN_TTL_MS = 60 * 60 * 1000; // 1 hour
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, run] of runStore.runs) {
+    if (run.status === 'completed' || run.status === 'failed') {
+      const age = now - new Date(run.updatedAt).getTime();
+      if (age > RUN_TTL_MS) {
+        runStore.runs.delete(id);
+      }
+    }
+  }
+}, 5 * 60 * 1000);
