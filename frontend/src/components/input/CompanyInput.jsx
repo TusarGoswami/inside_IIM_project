@@ -56,9 +56,14 @@ export function CompanyInput({ onSubmit, isLoading }) {
           Investment Committee Dossier System
         </h1>
 
+        {/* Tagline */}
+        <p className="text-lg sm:text-2xl font-serif font-bold text-[#8B2E2E] tracking-tight mb-4">
+          Not an opinion. A committee decision.
+        </p>
+
         {/* Description / Subtitle */}
         <p className="text-xs sm:text-sm text-[#22201B]/80 font-sans leading-relaxed mb-8 max-w-2xl">
-          Simulate a Wall Street Investment Committee review. Enter any target corporation to execute live web research, IC memo drafting, parallel Bull vs. Bear debate, due diligence risk audit, and deterministic conviction calculation.
+          Enter any company. Watch AI advocates argue both sides, a risk auditor flag the red lines, and a deterministic scoring model — not a single LLM guess — reach the final verdict.
         </p>
 
         {/* Input Form Box */}
