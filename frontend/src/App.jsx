@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import logoSvg from './assets/logo.svg';
 import { useResearchSession } from './hooks/useResearchSession.js';
 import { fetchHistoryRun } from './api/researchClient.js';
@@ -12,6 +12,15 @@ import { RiskFlags } from './components/risk/RiskFlags.jsx';
 import { MemoPanel } from './components/memo/MemoPanel.jsx';
 import { HistoryPanel } from './components/history/HistoryPanel.jsx';
 import { ResearchPanel } from './components/research/ResearchPanel.jsx';
+
+/** Scrolls into view when first mounted — used to auto-scroll to new live panels. */
+function ScrollIntoView({ children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+  return <div ref={ref}>{children}</div>;
+}
 
 export default function App() {
   const { stage, partialState, finalState, error, startSession, resetSession } = useResearchSession();
@@ -125,6 +134,19 @@ export default function App() {
         {/* VIEW 2: Live Progress Session View */}
         {!showHistory && !historyLoading && isRunning && (
           <div className="space-y-6">
+            {/* Cancel Bar */}
+            <div className="flex items-center justify-between bg-[#EDE4D3] border-2 border-[#22201B] px-4 py-2.5 shadow-[3px_3px_0px_#22201B]">
+              <span className="text-xs font-mono font-bold text-[#22201B] uppercase tracking-wider">
+                ANALYZING: {state.companyName?.toUpperCase() || '...'}
+              </span>
+              <button
+                onClick={handleBackToInput}
+                className="min-h-[36px] px-4 py-1.5 bg-[#8B2E2E] hover:bg-[#a33737] active:bg-[#722525] text-[#EDE4D3] font-mono text-xs font-bold uppercase tracking-wider border-2 border-[#22201B] shadow-[2px_2px_0px_#22201B] transition-all cursor-pointer"
+              >
+                ✕ CANCEL INVESTIGATION
+              </button>
+            </div>
+
             <ProgressStepper
               stage={stage}
               reasoningTrail={state.reasoningTrail || []}
@@ -134,24 +156,32 @@ export default function App() {
 
             {/* Render partial panels immediately as backend streams each stage */}
             {state.research && (
-              <ResearchPanel research={state.research} companyName={state.companyName} />
+              <ScrollIntoView>
+                <ResearchPanel research={state.research} companyName={state.companyName} />
+              </ScrollIntoView>
             )}
 
             {state.memo && (
-              <MemoPanel memo={state.memo} companyName={state.companyName} />
+              <ScrollIntoView>
+                <MemoPanel memo={state.memo} companyName={state.companyName} />
+              </ScrollIntoView>
             )}
 
             {(state.bullCase || state.bearCase) && (
-              <DebatePanel
-                bullCase={state.bullCase}
-                bearCase={state.bearCase}
-                rebuttalOccurred={state.rebuttalOccurred}
-                rebuttal={state.rebuttal}
-              />
+              <ScrollIntoView>
+                <DebatePanel
+                  bullCase={state.bullCase}
+                  bearCase={state.bearCase}
+                  rebuttalOccurred={state.rebuttalOccurred}
+                  rebuttal={state.rebuttal}
+                />
+              </ScrollIntoView>
             )}
 
             {state.riskFlags && state.riskFlags.length > 0 && (
-              <RiskFlags riskFlags={state.riskFlags} />
+              <ScrollIntoView>
+                <RiskFlags riskFlags={state.riskFlags} />
+              </ScrollIntoView>
             )}
           </div>
         )}
