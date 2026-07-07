@@ -1,5 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { STAGES } from '../../types/research.js';
+
+/**
+ * ElapsedTimer — Shows a live MM:SS counter from when the pipeline started.
+ */
+function ElapsedTimer() {
+  const [elapsed, setElapsed] = useState(0);
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    startRef.current = Date.now();
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const secs = String(elapsed % 60).padStart(2, '0');
+
+  return (
+    <span className="text-[11px] font-mono font-bold text-[#6B6353]">
+      ⏱ {mins}:{secs}
+    </span>
+  );
+}
 
 const STEP_CONFIG = [
   {
@@ -209,9 +234,12 @@ export function ProgressStepper({ stage, reasoningTrail = [], error, companyName
           </h2>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="text-[11px] font-mono px-3 py-1 bg-[#EDE4D3] text-[#22201B] border border-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]">
-            STREAM ACTIVE
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono px-3 py-1 bg-[#EDE4D3] text-[#22201B] border border-[#22201B] font-bold shadow-[2px_2px_0px_#22201B]">
+              STREAM ACTIVE
+            </span>
+            <ElapsedTimer />
+          </div>
           <span className="text-[10px] font-mono text-[#6B6353] font-bold">
             {completedSteps}/{STEP_CONFIG.length} SECTIONS COMPLETE
           </span>
