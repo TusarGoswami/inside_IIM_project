@@ -91,11 +91,26 @@ function wrapNode(nodeName, nodeFn) {
       return { reasoningTrail: [`[${nodeName}] Skipped — previous error: ${state.error}`] };
     }
 
+    const startTime = Date.now();
+    console.log(`\n==================================================`);
+    console.log(`[NODE TIMING - START] ${nodeName} at ${new Date(startTime).toISOString()}`);
+    console.log(`==================================================\n`);
+
     try {
       const result = await nodeFn(state);
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      console.log(`\n==================================================`);
+      console.log(`[NODE TIMING - END] ${nodeName} at ${new Date(endTime).toISOString()} (Duration: ${duration}ms)`);
+      console.log(`==================================================\n`);
       return result;
     } catch (err) {
+      const endTime = Date.now();
+      const duration = endTime - startTime;
       console.error(`[${nodeName}] Error:`, err);
+      console.log(`\n==================================================`);
+      console.log(`[NODE TIMING - END WITH ERROR] ${nodeName} at ${new Date(endTime).toISOString()} (Duration: ${duration}ms)`);
+      console.log(`==================================================\n`);
       return {
         error: `${nodeName} failed: ${err.message}`,
         reasoningTrail: [`[${nodeName}] ERROR: ${err.message}`],

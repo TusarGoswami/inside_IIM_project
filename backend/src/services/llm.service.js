@@ -9,7 +9,7 @@ import env from '../config/env.js';
  * @returns {ChatGoogleGenerativeAI}
  */
 export function createLLM(tier = 'flash', options = {}) {
-  const modelName = options.model || 'gemini-2.5-flash-lite';
+  const modelName = options.model || 'gemini-2.5-flash';
 
   return new ChatGoogleGenerativeAI({
     model: modelName,
@@ -21,7 +21,7 @@ export function createLLM(tier = 'flash', options = {}) {
 
 /**
  * Invokes a structured LLM using verified active Gemini models.
- * Fallback chain: gemini-2.5-flash-lite -> gemini-3.5-flash -> gemini-flash-latest -> gemini-2.5-flash -> gemini-2.0-flash
+ * Fallback chain: gemini-2.5-flash -> gemini-2.0-flash -> gemini-1.5-flash
  *
  * @param {object} params
  * @param {import('zod').ZodSchema} params.schema - Zod schema for structured output
@@ -33,11 +33,9 @@ export function createLLM(tier = 'flash', options = {}) {
 export async function invokeStructuredLLM({ schema, prompt, tier = 'flash', maxRetries = 2 }) {
   // Verified active model list with separate quota pools
   const models = [
-    'gemini-2.5-flash-lite',
-    'gemini-3.5-flash',
-    'gemini-flash-latest',
     'gemini-2.5-flash',
     'gemini-2.0-flash',
+    'gemini-1.5-flash',
   ];
 
   let lastError = null;
@@ -53,8 +51,14 @@ export async function invokeStructuredLLM({ schema, prompt, tier = 'flash', maxR
         return result;
       } catch (err) {
         lastError = err;
-        const isQuotaExhausted = err.status === 429 || err.message?.includes('429') || err.message?.includes('Quota') || err.message?.includes('limit');
-        console.warn(`[LLM (${modelName})] Attempt ${attempt} failed: ${err.message.slice(0, 120)}...`);
+        const isQuotaExhausted =
+          err.status === 429 ||
+          err.statusCode === 429 ||
+          err.message?.includes('RESOURCE_EXHAUSTED') ||
+          err.message?.toLowerCase().includes('quota') ||
+          err.message?.toLowerCase().includes('rate limit');
+
+        console.warn(`[LLM (${modelName})] Attempt ${attempt} failed: ${err.message}`);
 
         if (isQuotaExhausted) {
           console.warn(`[LLM] Model ${modelName} rate limited / quota exhausted. Switching immediately to next active model...`);
@@ -69,7 +73,13 @@ export async function invokeStructuredLLM({ schema, prompt, tier = 'flash', maxR
   }
 
   // Format clean human-readable error if rate limited
-  const isRateLimit = lastError?.status === 429 || lastError?.message?.includes('429') || lastError?.message?.includes('Quota');
+  const isRateLimit =
+    lastError?.status === 429 ||
+    lastError?.statusCode === 429 ||
+    lastError?.message?.includes('RESOURCE_EXHAUSTED') ||
+    lastError?.message?.toLowerCase().includes('quota') ||
+    lastError?.message?.toLowerCase().includes('rate limit');
+
   if (isRateLimit) {
     throw new Error('Gemini API Free-Tier rate limit reached across models. Please wait 15–20 seconds for your quota window to reset, then click Try Again.');
   }
