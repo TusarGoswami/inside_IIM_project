@@ -53,7 +53,7 @@ export function CompanyInput({ onSubmit, isLoading }) {
 
         {/* Title */}
         <h1 className="text-3xl sm:text-5xl font-serif font-bold text-[#22201B] tracking-tight mb-3">
-          Investment Committee Dossier System
+          Should You Invest? Let's Find Out.
         </h1>
 
         {/* Tagline */}
