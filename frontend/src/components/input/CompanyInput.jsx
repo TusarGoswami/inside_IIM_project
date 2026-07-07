@@ -80,7 +80,7 @@ export function CompanyInput({ onSubmit, isLoading }) {
                 onChange={(e) => setInputVal(e.target.value)}
                 placeholder="ENTER ENTITY NAME (E.G. TESLA, STRIPE, ZOMATO)..."
                 disabled={isLoading}
-                className="w-full bg-[#EDE4D3] border-2 border-[#22201B] px-4 py-3 text-[#22201B] placeholder-[#6B6353] focus:outline-none focus:bg-white text-sm font-mono font-bold min-h-[44px]"
+                className="w-full bg-[#EDE4D3] border-2 border-[#22201B] px-4 py-3 text-[#22201B] placeholder-[#6B6353] focus:outline-none focus:ring-2 focus:ring-[#22201B] focus:ring-offset-2 focus:bg-white text-sm font-mono font-bold min-h-[44px]"
               />
               
               <button
