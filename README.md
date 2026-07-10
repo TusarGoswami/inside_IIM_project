@@ -6,6 +6,14 @@
 
 ---
 
+## 🤖 AI/LLM Build Documentation
+
+This project was built using AI-assisted pair programming with **Google Gemini**. The complete development log — including conversation flows, architectural decisions, debugging sessions, and where I guided vs. where AI contributed — is documented separately:
+
+📄 **[View Full AI Build Log →](./AI_BUILD_LOG.md)**
+
+---
+
 ## 1. Overview
 
 I built this project to simulate the multi-agent review process of a Wall Street Investment Committee (IC). Given a company name, the system queries search engines, drafts a structured memo, stages a parallel debate between bull and bear advocates, audits business and regulatory risks, and computes a final conviction score and investment verdict (**Invest**, **Watchlist**, or **Pass**) using a deterministic scoring algorithm.
